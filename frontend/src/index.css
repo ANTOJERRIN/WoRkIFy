@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-deep-navy: #070C1F;
+    --color-secondary-navy: #0B1533;
+    --color-blue-primary: #2F6BFF;
+    --color-blue-secondary: #1F54E0;
+    --color-violet-accent: #8B4CFF;
+    --color-violet-secondary: #6E36D6;
+    --color-neutral-bg: #FAFAFC;
+    --color-light-neutral: #F3F4F7;
+    --color-border-neutral: #DDE0E8;
+    --color-muted-text: #636875;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #070C1F;
+    background-color: #FAFAFC;
+    overflow-x: hidden;
+  }
+
+  .dark body {
+    color: #F3F4F7;
+    background-color: #070C1F;
+  }
+}
+
+/* Glassmorphism specification from DESIGN.md */
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 20px 40px -15px rgba(7, 12, 31, 0.06);
+}
+
+.glass-panel-dark {
+  background: rgba(11, 21, 51, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+}
+
+/* Floating animation for hero glass card */
+@keyframes softFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-soft-float {
+  animation: softFloat 6s ease-in-out infinite;
+}
+
+/* Card hover elevation per DESIGN.md (translateY -3px with soft shadow) */
+.card-hover-elevation {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-hover-elevation:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -6px rgba(7, 12, 31, 0.08);
+}
+
+.dark .card-hover-elevation:hover {
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.4);
+}
