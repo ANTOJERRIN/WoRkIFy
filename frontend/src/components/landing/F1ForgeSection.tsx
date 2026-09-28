@@ -1,5 +1,6 @@
 import React from 'react';
 import { ExternalLink, Sparkles, Terminal, Code2 } from 'lucide-react';
+import { F1FORGE_URL } from '../../config/site';
 
 export const F1ForgeSection: React.FC = () => {
   return (
@@ -20,7 +21,16 @@ export const F1ForgeSection: React.FC = () => {
             </div>
 
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#070C1F] dark:text-white tracking-tight mb-5 font-['Plus_Jakarta_Sans',sans-serif]">
-              Built by F1 Forge.
+              Built by{' '}
+              <a
+                href={F1FORGE_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:underline hover:text-[#2F6BFF] transition-colors"
+              >
+                F1 Forge
+              </a>
+              .
             </h2>
 
             <p className="text-lg text-[#636875] dark:text-gray-300 max-w-xl leading-relaxed mb-8">
@@ -66,12 +76,12 @@ export const F1ForgeSection: React.FC = () => {
               </p>
 
               <a
-                href="https://jerrin-ai.onrender.com"
+                href={F1FORGE_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full py-3 px-5 rounded-xl bg-[#2F6BFF] hover:bg-[#1F54E0] text-white text-xs font-semibold flex items-center justify-between transition-colors shadow-sm"
               >
-                <span>View profile & works</span>
+                <span>Visit F1 Forge</span>
                 <ExternalLink className="w-4 h-4" />
               </a>
 

@@ -61,7 +61,6 @@ export interface UserProfile {
   credentials: VerifiedCredential[];
   skills: string[];
   links: {
-    github?: string;
     linkedin?: string;
     portfolio?: string;
   };

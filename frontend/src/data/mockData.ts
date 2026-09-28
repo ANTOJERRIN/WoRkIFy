@@ -159,7 +159,6 @@ export const INITIAL_USER: UserProfile = {
       dateAwarded: 'September 2026',
       hash: '0x8f2d...4a19c9',
       skills: ['LangGraph', 'Agentic Workflows', 'Human-in-the-Loop'],
-      buildUrl: 'https://github.com/ANTOJERRIN/agent-swarm-core',
       badgeType: 'GOLD'
     },
     {
@@ -169,12 +168,10 @@ export const INITIAL_USER: UserProfile = {
       dateAwarded: 'August 2026',
       hash: '0x3c71...99e821',
       skills: ['Reciprocal Rank Fusion', 'Vector DB', 'Cohere Rerank'],
-      buildUrl: 'https://github.com/ANTOJERRIN/hybrid-rag-engine',
       badgeType: 'VERIFIED'
     }
   ],
   links: {
-    github: 'https://github.com/ANTOJERRIN',
     linkedin: 'https://linkedin.com',
     portfolio: 'https://jerrin-ai.onrender.com'
   }
