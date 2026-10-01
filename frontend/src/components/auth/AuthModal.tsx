@@ -34,7 +34,7 @@ export const AuthModal: React.FC = () => {
                 Sign in to Workify
               </h2>
               <p className="text-xs text-[#636875] dark:text-gray-400">
-                Join live builds and earn verified credentials
+                Join live builds and hands-on workshops
               </p>
             </div>
           </div>
@@ -84,7 +84,7 @@ export const AuthModal: React.FC = () => {
             onClick={() => login()}
             className="w-full py-2.5 px-4 rounded-xl bg-[#F3F4F7] dark:bg-white/5 hover:bg-[#DDE0E8] dark:hover:bg-white/10 text-[#070C1F] dark:text-white text-xs font-semibold border border-[#DDE0E8] dark:border-white/10 transition-colors"
           >
-            Sign in as Demo Builder (Jerrin Anto)
+            Sign in as Demo User
           </button>
 
           <div className="pt-3 flex items-center justify-center gap-1.5 text-[11px] text-[#636875] dark:text-gray-400">

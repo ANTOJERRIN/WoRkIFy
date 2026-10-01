@@ -1,6 +1,6 @@
 import React from 'react';
 import { useWorkify } from '../../context/WorkifyContext';
-import { ArrowRight, CheckCircle2, Terminal } from 'lucide-react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export const HeroSection: React.FC = () => {
   const { login, setCurrentPage } = useWorkify();
@@ -65,11 +65,6 @@ export const HeroSection: React.FC = () => {
             <div className="flex items-center gap-2 text-xs text-[#636875] dark:text-gray-400">
               <CheckCircle2 className="w-4 h-4 text-emerald-500" />
               <span>Interactive workshops</span>
-            </div>
-            <div className="h-3 w-px bg-[#DDE0E8] dark:bg-white/20 hidden sm:block"></div>
-            <div className="flex items-center gap-2 text-xs text-[#636875] dark:text-gray-400">
-              <Terminal className="w-4 h-4 text-[#2F6BFF]" />
-              <span>Verified credentials</span>
             </div>
           </div>
         </div>

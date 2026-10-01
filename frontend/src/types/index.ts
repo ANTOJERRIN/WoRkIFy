@@ -26,26 +26,16 @@ export interface Workshop {
   mode: 'Online — Google Meet';
   meetUrl: string;
   dateTime: string;
-  startsAt: string; // ISO string
-  durationMinutes: number;
+  startsAt?: string; // ISO string
+  durationMinutes?: number;
   tags: string[];
-  prerequisites: string[];
-  agenda: AgendaItem[];
-  attendeesCount: number;
+  prerequisites?: string[];
+  agenda?: AgendaItem[];
+  attendeesCount?: number;
   maxAttendees?: number;
-  level: 'Beginner' | 'Intermediate' | 'Advanced';
+  level?: 'Beginner' | 'Intermediate' | 'Advanced';
   featured?: boolean;
-}
-
-export interface VerifiedCredential {
-  id: string;
-  title: string;
-  issuer: string;
-  dateAwarded: string;
-  hash: string;
-  skills: string[];
-  buildUrl?: string;
-  badgeType: 'GOLD' | 'PLATINUM' | 'VERIFIED';
+  comingSoon?: boolean;
 }
 
 export interface UserProfile {
@@ -57,8 +47,6 @@ export interface UserProfile {
   bio: string;
   location: string;
   companyOrSchool: string;
-  verifiedId: string;
-  credentials: VerifiedCredential[];
   skills: string[];
   links: {
     linkedin?: string;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, ShieldCheck } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { F1FORGE_URL } from '../../config/site';
 
 export const Footer: React.FC = () => {
@@ -41,12 +41,9 @@ export const Footer: React.FC = () => {
             <span>· Led by Jerrin Anto</span>
           </div>
 
-          {/* Right: Security & Links */}
+          {/* Right: Info */}
           <div className="flex items-center gap-5 text-xs text-[#636875] dark:text-gray-400">
-            <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Verified Proofs</span>
-            </div>
+            <span>Engineering AI Workspaces</span>
           </div>
 
         </div>

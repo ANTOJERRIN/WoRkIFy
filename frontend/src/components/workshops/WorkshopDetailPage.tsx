@@ -7,7 +7,6 @@ import {
   Video,
   CheckCircle2,
   ExternalLink,
-  ShieldCheck,
   Share2,
   Check,
   AlertCircle
@@ -104,7 +103,9 @@ export const WorkshopDetailPage: React.FC = () => {
               </div>
               <div>
                 <p className="text-xs text-[#636875] dark:text-gray-400">Duration</p>
-                <p className="font-semibold text-[#070C1F] dark:text-white">{workshop.durationMinutes} minutes</p>
+                <p className="font-semibold text-[#070C1F] dark:text-white">
+                  {workshop.durationMinutes ? `${workshop.durationMinutes} minutes` : 'To be announced'}
+                </p>
               </div>
             </div>
 
@@ -200,52 +201,56 @@ export const WorkshopDetailPage: React.FC = () => {
             </div>
 
             {/* Agenda Timeline */}
-            <div className="rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 p-8">
-              <h2 className="text-xl font-bold text-[#070C1F] dark:text-white mb-6 font-['Plus_Jakarta_Sans',sans-serif]">
-                Syllabus & Live Agenda
-              </h2>
+            {workshop.agenda && workshop.agenda.length > 0 && (
+              <div className="rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 p-8">
+                <h2 className="text-xl font-bold text-[#070C1F] dark:text-white mb-6 font-['Plus_Jakarta_Sans',sans-serif]">
+                  Syllabus & Live Agenda
+                </h2>
 
-              <div className="space-y-6">
-                {workshop.agenda.map((item, idx) => (
-                  <div key={idx} className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                      <div className="w-8 h-8 rounded-full bg-[#2F6BFF]/10 text-[#2F6BFF] text-xs font-bold flex items-center justify-center">
-                        {idx + 1}
+                <div className="space-y-6">
+                  {workshop.agenda.map((item, idx) => (
+                    <div key={idx} className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div className="w-8 h-8 rounded-full bg-[#2F6BFF]/10 text-[#2F6BFF] text-xs font-bold flex items-center justify-center">
+                          {idx + 1}
+                        </div>
+                        {idx < workshop.agenda!.length - 1 && (
+                          <div className="w-0.5 flex-1 bg-[#DDE0E8] dark:bg-white/10 my-1"></div>
+                        )}
                       </div>
-                      {idx < workshop.agenda.length - 1 && (
-                        <div className="w-0.5 flex-1 bg-[#DDE0E8] dark:bg-white/10 my-1"></div>
-                      )}
-                    </div>
-                    <div className="pb-4">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-mono text-xs font-semibold text-[#8B4CFF]">{item.time}</span>
-                        <span className="text-xs text-[#636875] dark:text-gray-400">·</span>
-                        <h3 className="text-sm font-bold text-[#070C1F] dark:text-white">{item.title}</h3>
+                      <div className="pb-4">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-mono text-xs font-semibold text-[#8B4CFF]">{item.time}</span>
+                          <span className="text-xs text-[#636875] dark:text-gray-400">·</span>
+                          <h3 className="text-sm font-bold text-[#070C1F] dark:text-white">{item.title}</h3>
+                        </div>
+                        <p className="text-xs text-[#636875] dark:text-gray-400">{item.summary}</p>
                       </div>
-                      <p className="text-xs text-[#636875] dark:text-gray-400">{item.summary}</p>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Prerequisites */}
-            <div className="rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 p-8">
-              <h2 className="text-xl font-bold text-[#070C1F] dark:text-white mb-4 font-['Plus_Jakarta_Sans',sans-serif]">
-                Prerequisites & Setup
-              </h2>
-              <ul className="space-y-2.5">
-                {workshop.prerequisites.map((p, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5 text-xs text-[#636875] dark:text-gray-300">
-                    <CheckCircle2 className="w-4 h-4 text-[#2F6BFF] shrink-0 mt-0.5" />
-                    <span>{p}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {workshop.prerequisites && workshop.prerequisites.length > 0 && (
+              <div className="rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 p-8">
+                <h2 className="text-xl font-bold text-[#070C1F] dark:text-white mb-4 font-['Plus_Jakarta_Sans',sans-serif]">
+                  Prerequisites & Setup
+                </h2>
+                <ul className="space-y-2.5">
+                  {workshop.prerequisites.map((p, idx) => (
+                    <li key={idx} className="flex items-start gap-2.5 text-xs text-[#636875] dark:text-gray-300">
+                      <CheckCircle2 className="w-4 h-4 text-[#2F6BFF] shrink-0 mt-0.5" />
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
-          {/* Right Col: Host Profile & Credential Guarantee */}
+          {/* Right Col: Host Profile */}
           <div className="space-y-6">
             {/* Host Card */}
             <div className="rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 p-6">
@@ -255,7 +260,7 @@ export const WorkshopDetailPage: React.FC = () => {
 
               <div className="flex items-center gap-3.5 mb-4">
                 <img
-                  src={workshop.host.avatarUrl}
+                  src={workshop.host.avatarUrl || '/workify-logo.png'}
                   alt={workshop.host.name}
                   className="w-14 h-14 rounded-2xl object-cover border border-[#DDE0E8] dark:border-white/20"
                 />
@@ -273,26 +278,9 @@ export const WorkshopDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              <p className="text-xs text-[#636875] dark:text-gray-300 leading-relaxed mb-4">
+              <p className="text-xs text-[#636875] dark:text-gray-300 leading-relaxed">
                 Practitioner and engineering lead building production AI workflows and training next-generation software builders.
               </p>
-            </div>
-
-            {/* Verified Credential Artifact */}
-            <div className="rounded-3xl p-6 glass-panel-light dark:glass-panel-dark border border-white dark:border-white/10">
-              <div className="flex items-center gap-2 mb-3">
-                <ShieldCheck className="w-5 h-5 text-emerald-500" />
-                <h3 className="font-bold text-sm text-[#070C1F] dark:text-white">
-                  Verified Build Proof
-                </h3>
-              </div>
-              <p className="text-xs text-[#636875] dark:text-gray-300 leading-relaxed mb-4">
-                Completing this workshop and submitting your repository grants a tamper-proof Workify Credential on your verified public profile.
-              </p>
-              <div className="p-3 rounded-xl bg-white/80 dark:bg-white/5 border border-[#DDE0E8] dark:border-white/10 text-[11px] font-mono text-[#636875] dark:text-gray-400 flex items-center justify-between">
-                <span>Proof Standard:</span>
-                <span className="font-bold text-[#2F6BFF]">WORKIFY-v1-PROOF</span>
-              </div>
             </div>
           </div>
 

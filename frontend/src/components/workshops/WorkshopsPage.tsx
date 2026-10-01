@@ -13,8 +13,8 @@ export const WorkshopsPage: React.FC = () => {
 
   const filteredWorkshops = useMemo(() => {
     return workshops.filter((w) => {
-      // Domain filter
-      if (selectedDomain !== 'ALL' && w.domain !== selectedDomain) {
+      // Domain filter: workshops marked 'ALL' apply across all domain tracks
+      if (selectedDomain !== 'ALL' && w.domain !== selectedDomain && w.domain !== 'ALL') {
         return false;
       }
       // Search query
@@ -30,7 +30,7 @@ export const WorkshopsPage: React.FC = () => {
       }
       return true;
     });
-  }, [workshops, selectedDomain, dateFilter, searchQuery]);
+  }, [workshops, selectedDomain, searchQuery]);
 
   return (
     <div className="w-full py-10 md:py-16 bg-[#FAFAFC] dark:bg-[#070C1F] min-h-[calc(100vh-4rem)] transition-colors">

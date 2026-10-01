@@ -1,15 +1,10 @@
 import React, { useState } from 'react';
 import { useWorkify } from '../../context/WorkifyContext';
 import {
-  ShieldCheck,
-  CheckCircle2,
   ExternalLink,
   Globe,
   Share2,
   Check,
-  Award,
-  Terminal,
-  Code2,
   Sparkles
 } from 'lucide-react';
 
@@ -40,9 +35,6 @@ export const ProfilePage: React.FC = () => {
                   alt={userProfile.name}
                   className="w-24 h-24 rounded-3xl object-cover border-2 border-white dark:border-white/20 shadow-lg"
                 />
-                <div className="absolute -bottom-1 -right-1 p-1 bg-white dark:bg-[#0B1533] rounded-full shadow">
-                  <CheckCircle2 className="w-5 h-5 text-[#2F6BFF] fill-[#2F6BFF]/10" />
-                </div>
               </div>
 
               <div>
@@ -50,10 +42,6 @@ export const ProfilePage: React.FC = () => {
                   <h1 className="text-2xl sm:text-3xl font-extrabold text-[#070C1F] dark:text-white font-['Plus_Jakarta_Sans',sans-serif]">
                     {userProfile.name}
                   </h1>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>Verified Builder</span>
-                  </span>
                 </div>
 
                 <p className="text-sm font-semibold text-[#8B4CFF] mb-2">{userProfile.headline}</p>
@@ -93,94 +81,21 @@ export const ProfilePage: React.FC = () => {
                 </a>
               )}
             </div>
-
-            <div className="font-mono text-[11px] text-[#636875] dark:text-gray-400 bg-[#F3F4F7] dark:bg-white/5 px-3 py-1.5 rounded-lg border border-[#DDE0E8] dark:border-white/10">
-              DID: <span className="text-[#070C1F] dark:text-gray-200 font-bold">{userProfile.verifiedId}</span>
-            </div>
           </div>
         </div>
 
         {/* 2 Column Layout: Verified Proofs & Skills */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Left 2 Cols: Cryptographic Credentials */}
+          {/* Left 2 Cols: Verified Proof of Skills */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-[#070C1F] dark:text-white font-['Plus_Jakarta_Sans',sans-serif]">
-                  Verified Proof of Builds
-                </h2>
-                <p className="text-xs text-[#636875] dark:text-gray-400">
-                  Tamper-proof credentials issued upon working code submission
-                </p>
-              </div>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#8B4CFF]/10 text-[#8B4CFF]">
-                {userProfile.credentials.length} verified
-              </span>
-            </div>
-
-            <div className="space-y-4">
-              {userProfile.credentials.map((cred) => (
-                <div
-                  key={cred.id}
-                  className="rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 p-6 shadow-sm flex flex-col justify-between card-hover-elevation"
-                >
-                  <div className="flex items-start justify-between gap-4 mb-4">
-                    <div className="flex items-start gap-3.5">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#2F6BFF] to-[#8B4CFF] flex items-center justify-center text-white shadow-md shrink-0">
-                        <Award className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-bold text-[#070C1F] dark:text-white text-base">
-                            {cred.title}
-                          </h3>
-                        </div>
-                        <p className="text-xs text-[#636875] dark:text-gray-400">
-                          Issued by {cred.issuer} · {cred.dateAwarded}
-                        </p>
-                      </div>
-                    </div>
-
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
-                      {cred.badgeType}
-                    </span>
-                  </div>
-
-                  {/* Skills badges */}
-                  <div className="flex flex-wrap gap-1.5 mb-5">
-                    {cred.skills.map((s) => (
-                      <span
-                        key={s}
-                        className="px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-[#F3F4F7] dark:bg-white/5 text-[#070C1F] dark:text-gray-300"
-                      >
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Footer with Hash & Code Build Link */}
-                  <div className="pt-3 border-t border-[#DDE0E8]/60 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
-                    <div className="flex items-center gap-1.5 font-mono text-[11px] text-[#636875] dark:text-gray-400">
-                      <Terminal className="w-3.5 h-3.5 text-[#2F6BFF]" />
-                      <span>Hash: {cred.hash}</span>
-                    </div>
-
-                    {cred.buildUrl && (
-                      <a
-                        href={cred.buildUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 font-semibold text-[#2F6BFF] hover:text-[#1F54E0] transition-colors"
-                      >
-                        <Code2 className="w-3.5 h-3.5" />
-                        <span>Inspect Repo Build</span>
-                        <ExternalLink className="w-3 h-3 ml-0.5" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
+            <div className="rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 p-8 shadow-sm">
+              <h2 className="text-xl font-bold text-[#070C1F] dark:text-white font-['Plus_Jakarta_Sans',sans-serif] mb-2">
+                Verified proof of skills
+              </h2>
+              <p className="text-sm text-[#636875] dark:text-gray-400 leading-relaxed">
+                In development — coming soon
+              </p>
             </div>
           </div>
 
@@ -190,7 +105,7 @@ export const ProfilePage: React.FC = () => {
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-4 h-4 text-[#8B4CFF]" />
                 <h3 className="font-bold text-sm text-[#070C1F] dark:text-white">
-                  Verified Skills
+                  Skills
                 </h3>
               </div>
 

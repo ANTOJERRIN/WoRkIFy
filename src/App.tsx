@@ -1,1 +1,3 @@
-export { default, App } from '../frontend/src/App';
+import App from '../frontend/src/App';
+
+export default App;

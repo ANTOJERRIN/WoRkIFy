@@ -31,10 +31,10 @@ const WorkifyContext = createContext<WorkifyContextType | undefined>(undefined);
 export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<PageRoute>('landing');
-  const [selectedWorkshopId, setSelectedWorkshopId] = useState<string | null>('wk-1');
+  const [selectedWorkshopId, setSelectedWorkshopId] = useState<string | null>('wk-linkedin');
   const [workshops, setWorkshops] = useState<Workshop[]>(INITIAL_WORKSHOPS);
-  const [registeredWorkshopIds, setRegisteredWorkshopIds] = useState<string[]>(['wk-1', 'wk-3']);
-  const [hostedWorkshopIds, setHostedWorkshopIds] = useState<string[]>(['wk-1']);
+  const [registeredWorkshopIds, setRegisteredWorkshopIds] = useState<string[]>([]);
+  const [hostedWorkshopIds, setHostedWorkshopIds] = useState<string[]>([]);
   const [isHostModalOpen, setIsHostModalOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [userProfile] = useState<UserProfile>(INITIAL_USER);
@@ -82,7 +82,7 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
     setWorkshops(prev => prev.map(w => {
       if (w.id === id) {
-        return { ...w, attendeesCount: w.attendeesCount + 1 };
+        return { ...w, attendeesCount: (w.attendeesCount ?? 0) + 1 };
       }
       return w;
     }));
@@ -91,8 +91,9 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const unregisterFromWorkshop = (id: string) => {
     setRegisteredWorkshopIds(prev => prev.filter(wId => wId !== id));
     setWorkshops(prev => prev.map(w => {
-      if (w.id === id && w.attendeesCount > 0) {
-        return { ...w, attendeesCount: w.attendeesCount - 1 };
+      const current = w.attendeesCount ?? 0;
+      if (w.id === id && current > 0) {
+        return { ...w, attendeesCount: current - 1 };
       }
       return w;
     }));

@@ -57,11 +57,9 @@ export const F1ForgeSection: React.FC = () => {
             <div className="w-full max-w-md rounded-3xl p-8 glass-panel-light dark:glass-panel-dark relative border border-white dark:border-white/10 shadow-xl">
               
               <div className="flex items-center gap-4 mb-6">
-                <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
-                  alt="Jerrin Anto"
-                  className="w-16 h-16 rounded-2xl object-cover border-2 border-white dark:border-white/20 shadow-md"
-                />
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#2F6BFF] to-[#8B4CFF] flex items-center justify-center text-white font-bold text-xl shadow-md border-2 border-white dark:border-white/20 shrink-0 font-['Plus_Jakarta_Sans',sans-serif]">
+                  JA
+                </div>
                 <div>
                   <span className="text-[11px] font-bold tracking-wider uppercase text-[#8B4CFF]">Founder & Lead</span>
                   <h3 className="text-xl font-bold text-[#070C1F] dark:text-white font-['Plus_Jakarta_Sans',sans-serif]">

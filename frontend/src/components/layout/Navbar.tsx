@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useWorkify } from '../../context/WorkifyContext';
-import { Sun, Moon, Plus, User, LogOut, CheckCircle2, ChevronDown, Menu, X, Sparkles } from 'lucide-react';
+import { Sun, Moon, Plus, User, LogOut, ChevronDown, Menu, X, Sparkles } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const {
@@ -107,7 +107,7 @@ export const Navbar: React.FC = () => {
           </nav>
         ) : (
           <div className="hidden md:flex items-center text-xs text-[#636875] dark:text-gray-400">
-            <span>AI Learning · Real Builds · Verified Proofs</span>
+            <span>AI Learning · Real Builds · Live Workshops</span>
           </div>
         )}
 
@@ -154,9 +154,8 @@ export const Navbar: React.FC = () => {
                     onMouseLeave={() => setIsAvatarMenuOpen(false)}
                   >
                     <div className="px-4 py-2 border-b border-[#DDE0E8] dark:border-white/10">
-                      <div className="flex items-center gap-1.5 font-semibold text-[#070C1F] dark:text-white">
+                      <div className="font-semibold text-[#070C1F] dark:text-white">
                         <span>{userProfile.name}</span>
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#2F6BFF] fill-[#2F6BFF]/10" />
                       </div>
                       <p className="text-xs text-[#636875] dark:text-gray-400 truncate">{userProfile.handle}</p>
                     </div>
@@ -169,7 +168,7 @@ export const Navbar: React.FC = () => {
                       className="w-full px-4 py-2 text-left text-[#070C1F] dark:text-gray-200 hover:bg-[#F3F4F7] dark:hover:bg-white/5 flex items-center gap-2"
                     >
                       <User className="w-4 h-4 text-[#2F6BFF]" />
-                      <span>Verified Profile</span>
+                      <span>Profile</span>
                     </button>
 
                     <button
@@ -180,7 +179,7 @@ export const Navbar: React.FC = () => {
                       className="w-full px-4 py-2 text-left text-[#070C1F] dark:text-gray-200 hover:bg-[#F3F4F7] dark:hover:bg-white/5 flex items-center gap-2"
                     >
                       <Sparkles className="w-4 h-4 text-[#8B4CFF]" />
-                      <span>My Workshops & Proofs</span>
+                      <span>My Workshops</span>
                     </button>
 
                     <div className="border-t border-[#DDE0E8] dark:border-white/10 my-1"></div>
@@ -249,7 +248,7 @@ export const Navbar: React.FC = () => {
                 }}
                 className="w-full text-left py-2 font-medium text-[#070C1F] dark:text-white"
               >
-                Verified Profile
+                Profile
               </button>
               <button
                 onClick={() => {
