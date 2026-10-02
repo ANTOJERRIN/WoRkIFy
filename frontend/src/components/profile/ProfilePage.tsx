@@ -3,7 +3,9 @@ import { useWorkify } from '../../context/WorkifyContext';
 import { ProfileEditForm } from './ProfileEditForm';
 import { listUserRegistrationsWithWorkshops } from '../../api/registrations';
 import { formatWorkshopDateIST } from '../../api/workshops';
-import type { RegistrationWithWorkshop, UserProfile } from '../../types';
+import { listUserLinkedInReviews } from '../../api/reviews';
+import type { RegistrationWithWorkshop, UserProfile, LinkedInReview } from '../../types';
+import { LinkedInReviewModal, getBandColor } from '../reviews/LinkedInReviewModal';
 import {
   ExternalLink,
   Globe,
@@ -13,7 +15,9 @@ import {
   Edit3,
   Clock,
   MapPin,
-  GraduationCap
+  GraduationCap,
+  Loader2,
+  ArrowRight
 } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
@@ -22,6 +26,13 @@ export const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [registrations, setRegistrations] = useState<RegistrationWithWorkshop[]>([]);
   const [loadingRegistrations, setLoadingRegistrations] = useState(true);
+
+  // Reviews state
+  const [reviews, setReviews] = useState<LinkedInReview[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(true);
+  const [reviewModalWorkshop, setReviewModalWorkshop] = useState<{ id: string; title: string } | null>(null);
+  const [activeReviewForModal, setActiveReviewForModal] = useState<LinkedInReview | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const displayHandle = userProfile.handle ? `@${userProfile.handle.replace(/^@/, '')}` : '';
 
@@ -51,9 +62,44 @@ export const ProfilePage: React.FC = () => {
     }
   }, [authUser]);
 
+  const loadReviews = useCallback(async () => {
+    if (!authUser) {
+      setReviews([]);
+      setLoadingReviews(false);
+      return;
+    }
+    setLoadingReviews(true);
+    try {
+      const data = await listUserLinkedInReviews();
+      setReviews(data);
+    } catch (err) {
+      console.error('Failed to load user reviews on profile:', err);
+    } finally {
+      setLoadingReviews(false);
+    }
+  }, [authUser]);
+
   useEffect(() => {
     loadRegisteredWorkshops();
-  }, [loadRegisteredWorkshops]);
+    loadReviews();
+  }, [loadRegisteredWorkshops, loadReviews]);
+
+  const handleOpenReviewModal = (workshop: { id: string; title: string }, review: LinkedInReview | null) => {
+    setReviewModalWorkshop(workshop);
+    setActiveReviewForModal(review);
+    setIsReviewModalOpen(true);
+  };
+
+  const handleReviewSuccess = (newReview: LinkedInReview) => {
+    setReviews(prev => {
+      const exists = prev.some(r => r.id === newReview.id);
+      if (exists) {
+        return prev.map(r => (r.id === newReview.id ? newReview : r));
+      }
+      return [newReview, ...prev];
+    });
+    setActiveReviewForModal(newReview);
+  };
 
   const handleSavedProfile = (updated: UserProfile) => {
     setUserProfile(updated);
@@ -264,14 +310,113 @@ export const ProfilePage: React.FC = () => {
               )}
             </div>
 
-            {/* Verified proof of skills — In development card */}
+            {/* LinkedIn Review Card */}
             <div className="rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 p-8 shadow-sm">
-              <h2 className="text-xl font-bold text-[#070C1F] dark:text-white font-['Plus_Jakarta_Sans',sans-serif] mb-2">
-                Verified proof of skills
-              </h2>
-              <p className="text-sm text-[#636875] dark:text-gray-400 leading-relaxed">
-                In development — coming soon
-              </p>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-[#070C1F] dark:text-white font-['Plus_Jakarta_Sans',sans-serif]">
+                      LinkedIn Review
+                    </h2>
+                    <p className="text-xs text-[#636875] dark:text-gray-400">
+                      AI profile critique scored against workshop rubric
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {loadingReviews ? (
+                <div className="py-6 flex items-center justify-center gap-2 text-xs text-[#636875] dark:text-gray-400">
+                  <Loader2 className="w-4 h-4 animate-spin text-[#2F6BFF]" />
+                  <span>Loading review...</span>
+                </div>
+              ) : reviews.length > 0 ? (
+                <div className="space-y-4">
+                  {reviews.map(rev => (
+                    <div
+                      key={rev.id}
+                      className="p-5 rounded-2xl bg-[#F3F4F7] dark:bg-white/5 border border-[#DDE0E8]/70 dark:border-white/10 space-y-4"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#DDE0E8]/60 dark:border-white/10">
+                        <div>
+                          <h4 className="text-sm font-bold text-[#070C1F] dark:text-white">
+                            {rev.workshopTitle || 'LinkedIn Workshop'}
+                          </h4>
+                          <span className="text-[11px] text-[#636875] dark:text-gray-400">
+                            Evaluated {new Date(rev.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-3 self-start sm:self-auto">
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getBandColor(rev.band)}`}>
+                            {rev.band}
+                          </span>
+                          <div className="text-right">
+                            <span className="text-xl font-extrabold text-[#070C1F] dark:text-white">
+                              {rev.overallScore}
+                            </span>
+                            <span className="text-xs text-[#636875] dark:text-gray-400 font-semibold"> / 100</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div className="p-3 rounded-xl bg-white dark:bg-[#070C1F] border border-[#DDE0E8]/60 dark:border-white/10 space-y-1">
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400 text-[11px] uppercase tracking-wider block">
+                            Key Strengths
+                          </span>
+                          <p className="text-[#636875] dark:text-gray-300 whitespace-pre-line leading-relaxed text-[11px]">
+                            {rev.strengths}
+                          </p>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-white dark:bg-[#070C1F] border border-[#DDE0E8]/60 dark:border-white/10 space-y-1">
+                          <span className="font-bold text-purple-600 dark:text-purple-400 text-[11px] uppercase tracking-wider block">
+                            Actionable Improvements
+                          </span>
+                          <p className="text-[#636875] dark:text-gray-300 whitespace-pre-line leading-relaxed text-[11px]">
+                            {rev.improvements}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleOpenReviewModal({ id: rev.workshopId, title: rev.workshopTitle || 'LinkedIn Workshop' }, rev)}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2F6BFF] hover:text-[#1F54E0] transition-colors"
+                      >
+                        <span>View full rubric breakdown</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-6 rounded-2xl bg-[#F3F4F7] dark:bg-white/5 border border-dashed border-[#DDE0E8] dark:border-white/10 text-center space-y-3">
+                  <p className="text-xs text-[#636875] dark:text-gray-400 max-w-md mx-auto leading-relaxed">
+                    {registrations.some(r => r.workshop.endsAt && new Date() > new Date(r.workshop.endsAt))
+                      ? 'Your workshop has concluded! You are eligible to submit your LinkedIn profile for an AI evaluation.'
+                      : 'Complete a workshop to receive your personalized LinkedIn profile evaluation and score.'}
+                  </p>
+
+                  {registrations.find(r => r.workshop.endsAt && new Date() > new Date(r.workshop.endsAt)) && (
+                    <button
+                      onClick={() => {
+                        const endedReg = registrations.find(r => r.workshop.endsAt && new Date() > new Date(r.workshop.endsAt));
+                        if (endedReg) {
+                          handleOpenReviewModal({ id: endedReg.workshop.id, title: endedReg.workshop.title }, null);
+                        }
+                      }}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#8B4CFF] to-[#2F6BFF] hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Get your LinkedIn review</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -307,6 +452,21 @@ export const ProfilePage: React.FC = () => {
         </div>
 
       </div>
+
+      {/* LinkedIn Review Modal */}
+      {reviewModalWorkshop && (
+        <LinkedInReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => {
+            setIsReviewModalOpen(false);
+            setReviewModalWorkshop(null);
+          }}
+          workshop={reviewModalWorkshop}
+          initialLinkedinUrl={userProfile.links.linkedin}
+          existingReview={activeReviewForModal}
+          onSuccess={handleReviewSuccess}
+        />
+      )}
     </div>
   );
 };

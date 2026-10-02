@@ -13,8 +13,7 @@ import {
   Loader2,
   AlertCircle,
   Video,
-  ExternalLink,
-  Award
+  ExternalLink
 } from 'lucide-react';
 
 interface DashboardWorkshopCardProps {
@@ -167,6 +166,7 @@ export const DashboardPage: React.FC = () => {
   const {
     isLoggedIn,
     authUser,
+    userProfile,
     unregisterFromWorkshop,
     openWorkshopDetail,
     setIsAuthModalOpen,
@@ -175,8 +175,14 @@ export const DashboardPage: React.FC = () => {
   } = useWorkify();
 
   const [registrations, setRegistrations] = useState<RegistrationWithWorkshop[]>([]);
+  const [reviewsMap, setReviewsMap] = useState<Record<string, LinkedInReview>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Review modal state
+  const [reviewModalWorkshop, setReviewModalWorkshop] = useState<{ id: string; title: string } | null>(null);
+  const [activeReviewForModal, setActiveReviewForModal] = useState<LinkedInReview | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -188,14 +194,27 @@ export const DashboardPage: React.FC = () => {
   const loadData = useCallback(async () => {
     if (!authUser) {
       setRegistrations([]);
+      setReviewsMap({});
       setLoading(false);
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      const data = await listUserRegistrationsWithWorkshops();
-      setRegistrations(data);
+      const [regs, userReviews] = await Promise.all([
+        listUserRegistrationsWithWorkshops(),
+        listUserLinkedInReviews().catch(err => {
+          console.error('Error fetching user reviews:', err);
+          return [] as LinkedInReview[];
+        }),
+      ]);
+      setRegistrations(regs);
+
+      const map: Record<string, LinkedInReview> = {};
+      userReviews.forEach(r => {
+        map[r.workshopId] = r;
+      });
+      setReviewsMap(map);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to load registered workshops';
       setError(msg);
@@ -215,6 +234,20 @@ export const DashboardPage: React.FC = () => {
   const handleCancelRegistration = async (workshopId: string) => {
     await unregisterFromWorkshop(workshopId);
     setRegistrations(prev => prev.filter(r => r.workshopId !== workshopId));
+  };
+
+  const handleOpenReview = (w: { id: string; title: string }, review: LinkedInReview | null) => {
+    setReviewModalWorkshop(w);
+    setActiveReviewForModal(review);
+    setIsReviewModalOpen(true);
+  };
+
+  const handleReviewSuccess = (newReview: LinkedInReview) => {
+    setReviewsMap(prev => ({
+      ...prev,
+      [newReview.workshopId]: newReview,
+    }));
+    setActiveReviewForModal(newReview);
   };
 
   return (
@@ -297,8 +330,10 @@ export const DashboardPage: React.FC = () => {
                   <DashboardWorkshopCard
                     key={reg.id}
                     registration={reg}
+                    review={reviewsMap[reg.workshop.id]}
                     onOpenDetail={openWorkshopDetail}
                     onCancelRegistration={handleCancelRegistration}
+                    onOpenReview={handleOpenReview}
                   />
                 ))}
               </div>
@@ -325,6 +360,21 @@ export const DashboardPage: React.FC = () => {
         </div>
 
       </div>
+
+      {/* LinkedIn Review Modal */}
+      {reviewModalWorkshop && (
+        <LinkedInReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => {
+            setIsReviewModalOpen(false);
+            setReviewModalWorkshop(null);
+          }}
+          workshop={reviewModalWorkshop}
+          initialLinkedinUrl={userProfile.links.linkedin}
+          existingReview={activeReviewForModal}
+          onSuccess={handleReviewSuccess}
+        />
+      )}
     </div>
   );
 };
