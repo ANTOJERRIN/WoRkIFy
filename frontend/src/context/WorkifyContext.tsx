@@ -1,7 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { Workshop, UserProfile, PageRoute } from '../types';
-import { INITIAL_WORKSHOPS, INITIAL_USER } from '../data/mockData';
+import { INITIAL_USER } from '../data/mockData';
 import { supabase } from '../lib/supabase';
+import {
+  listWorkshops,
+  listUserRegistrations,
+  registerForWorkshop as apiRegister,
+  unregister as apiUnregister,
+} from '../api/workshops';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface WorkifyContextType {
@@ -15,12 +21,13 @@ interface WorkifyContextType {
   selectedWorkshopId: string | null;
   openWorkshopDetail: (workshopId: string) => void;
   workshops: Workshop[];
+  workshopsLoading: boolean;
+  workshopsError: string | null;
+  reloadWorkshops: () => Promise<void>;
   registeredWorkshopIds: string[];
-  hostedWorkshopIds: string[];
-  registerForWorkshop: (id: string) => void;
-  unregisterFromWorkshop: (id: string) => void;
-  hostNewWorkshop: (workshop: Omit<Workshop, 'id' | 'attendeesCount'>) => void;
-  cancelHostedWorkshop: (id: string) => void;
+  registeringWorkshopId: string | null;
+  registerForWorkshop: (id: string) => Promise<void>;
+  unregisterFromWorkshop: (id: string) => Promise<void>;
   isHostModalOpen: boolean;
   setIsHostModalOpen: (open: boolean) => void;
   isAuthModalOpen: boolean;
@@ -36,10 +43,12 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<PageRoute>('landing');
-  const [selectedWorkshopId, setSelectedWorkshopId] = useState<string | null>('wk-linkedin');
-  const [workshops, setWorkshops] = useState<Workshop[]>(INITIAL_WORKSHOPS);
+  const [selectedWorkshopId, setSelectedWorkshopId] = useState<string | null>(null);
+  const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [workshopsLoading, setWorkshopsLoading] = useState<boolean>(true);
+  const [workshopsError, setWorkshopsError] = useState<string | null>(null);
   const [registeredWorkshopIds, setRegisteredWorkshopIds] = useState<string[]>([]);
-  const [hostedWorkshopIds, setHostedWorkshopIds] = useState<string[]>([]);
+  const [registeringWorkshopId, setRegisteringWorkshopId] = useState<string | null>(null);
   const [isHostModalOpen, setIsHostModalOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [darkMode, setDarkMode] = useState<boolean>(false);
@@ -62,15 +71,59 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     : INITIAL_USER;
 
-  // Listen for auth state changes (session restore on reload + OAuth callback)
+  // Fetch workshops from Supabase
+  const loadWorkshops = useCallback(async () => {
+    setWorkshopsLoading(true);
+    setWorkshopsError(null);
+    try {
+      const data = await listWorkshops();
+      setWorkshops(data);
+      if (data.length > 0 && !selectedWorkshopId) {
+        setSelectedWorkshopId(data[0].id);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load workshops';
+      setWorkshopsError(msg);
+    } finally {
+      setWorkshopsLoading(false);
+    }
+  }, [selectedWorkshopId]);
+
+  // Fetch user registrations
+  const loadRegistrations = useCallback(async () => {
+    if (!authUser) {
+      setRegisteredWorkshopIds([]);
+      return;
+    }
+    try {
+      const regIds = await listUserRegistrations();
+      setRegisteredWorkshopIds(regIds);
+    } catch (err) {
+      console.error('Failed to load user registrations:', err);
+    }
+  }, [authUser]);
+
+  const handleSession = (session: Session | null) => {
+    if (session?.user) {
+      setAuthUser(session.user);
+    } else {
+      setAuthUser(null);
+      setRegisteredWorkshopIds([]);
+    }
+  };
+
+  // Initial load of workshops
   useEffect(() => {
-    // Get the initial session
+    loadWorkshops();
+  }, [loadWorkshops]);
+
+  // Listen for auth state changes
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       handleSession(session);
       setAuthLoading(false);
     });
 
-    // Subscribe to future auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       handleSession(session);
     });
@@ -78,16 +131,16 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => {
       subscription.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSession = (session: Session | null) => {
-    if (session?.user) {
-      setAuthUser(session.user);
+  // Reload registrations whenever auth user changes
+  useEffect(() => {
+    if (authUser) {
+      loadRegistrations();
     } else {
-      setAuthUser(null);
+      setRegisteredWorkshopIds([]);
     }
-  };
+  }, [authUser, loadRegistrations]);
 
   // When a session appears while on the landing page, navigate to workshops
   useEffect(() => {
@@ -119,12 +172,12 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (error) {
       console.error('Google sign-in error:', error.message);
     }
-    // The page will redirect to Google — on return, onAuthStateChange picks up the session.
   }, []);
 
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setAuthUser(null);
+    setRegisteredWorkshopIds([]);
     setCurrentPage('landing');
   }, []);
 
@@ -134,57 +187,34 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const registerForWorkshop = (id: string) => {
+  const registerForWorkshop = async (id: string) => {
     if (!isLoggedIn) {
       setIsAuthModalOpen(true);
       return;
     }
-    setRegisteredWorkshopIds(prev => {
-      if (prev.includes(id)) return prev;
-      return [...prev, id];
-    });
-    setWorkshops(prev => prev.map(w => {
-      if (w.id === id) {
-        return { ...w, attendeesCount: (w.attendeesCount ?? 0) + 1 };
-      }
-      return w;
-    }));
+    setRegisteringWorkshopId(id);
+    try {
+      await apiRegister(id);
+      setRegisteredWorkshopIds(prev => (prev.includes(id) ? prev : [...prev, id]));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Registration failed';
+      console.error('Registration failed:', msg);
+      alert(msg);
+    } finally {
+      setRegisteringWorkshopId(null);
+    }
   };
 
-  const unregisterFromWorkshop = (id: string) => {
-    setRegisteredWorkshopIds(prev => prev.filter(wId => wId !== id));
-    setWorkshops(prev => prev.map(w => {
-      const current = w.attendeesCount ?? 0;
-      if (w.id === id && current > 0) {
-        return { ...w, attendeesCount: current - 1 };
-      }
-      return w;
-    }));
-  };
-
-  const hostNewWorkshop = (data: Omit<Workshop, 'id' | 'attendeesCount'>) => {
-    const newId = 'wk-' + Date.now();
-    const newWorkshop: Workshop = {
-      ...data,
-      id: newId,
-      attendeesCount: 1,
-      host: {
-        name: userProfile.name,
-        role: 'Host & Instructor',
-        organization: userProfile.companyOrSchool,
-        avatarUrl: userProfile.avatarUrl,
-        verified: true
-      }
-    };
-    setWorkshops(prev => [newWorkshop, ...prev]);
-    setHostedWorkshopIds(prev => [newId, ...prev]);
-    setIsHostModalOpen(false);
-    setCurrentPage('dashboard');
-  };
-
-  const cancelHostedWorkshop = (id: string) => {
-    setHostedWorkshopIds(prev => prev.filter(wId => wId !== id));
-    setWorkshops(prev => prev.filter(w => w.id !== id));
+  const unregisterFromWorkshop = async (id: string) => {
+    if (!isLoggedIn) return;
+    try {
+      await apiUnregister(id);
+      setRegisteredWorkshopIds(prev => prev.filter(wId => wId !== id));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unregistration failed';
+      console.error('Unregistration failed:', msg);
+      alert(msg);
+    }
   };
 
   // Guard protected pages: signed-out users go to landing + auth modal
@@ -211,12 +241,13 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         selectedWorkshopId,
         openWorkshopDetail,
         workshops,
+        workshopsLoading,
+        workshopsError,
+        reloadWorkshops: loadWorkshops,
         registeredWorkshopIds,
-        hostedWorkshopIds,
+        registeringWorkshopId,
         registerForWorkshop,
         unregisterFromWorkshop,
-        hostNewWorkshop,
-        cancelHostedWorkshop,
         isHostModalOpen,
         setIsHostModalOpen,
         isAuthModalOpen,

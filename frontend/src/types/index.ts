@@ -1,41 +1,26 @@
-export type Domain = 'ALL' | 'AGENTS' | 'GEN_AI' | 'AUTOMATION' | 'CLOUD' | 'HUMAN_AI';
-
-export interface HostInfo {
-  name: string;
-  role: string;
-  organization: string;
-  avatarUrl: string;
-  verified: boolean;
-}
-
-export interface AgendaItem {
-  time: string;
-  title: string;
-  summary: string;
-}
+export type WorkshopStatus = 'open' | 'coming_soon' | 'cancelled';
 
 export interface Workshop {
   id: string;
+  slug: string;
   title: string;
-  eyebrow?: string;
+  hostName: string;
+  mode: 'Online — Google Meet';
+  startsAt: string | null; // ISO string
+  endsAt: string | null;   // ISO string
+  timezone: string;
+  status: WorkshopStatus;
   shortDescription: string;
   fullDescription: string;
-  host: HostInfo;
-  domain: Domain;
-  domainLabel: string;
-  mode: 'Online — Google Meet';
-  meetUrl: string;
-  dateTime: string;
-  startsAt?: string; // ISO string
-  durationMinutes?: number;
   tags: string[];
-  prerequisites?: string[];
-  agenda?: AgendaItem[];
-  attendeesCount?: number;
-  maxAttendees?: number;
-  level?: 'Beginner' | 'Intermediate' | 'Advanced';
-  featured?: boolean;
-  comingSoon?: boolean;
+}
+
+export interface RegistrationWithWorkshop {
+  id: string;
+  userId: string;
+  workshopId: string;
+  createdAt: string;
+  workshop: Workshop;
 }
 
 export interface UserProfile {

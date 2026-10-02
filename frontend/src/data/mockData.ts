@@ -1,5 +1,4 @@
 import type { UserProfile } from '../types';
-export { INITIAL_WORKSHOPS } from './workshops';
 
 export const INITIAL_USER: UserProfile = {
   id: 'usr-101',
