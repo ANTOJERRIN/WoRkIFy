@@ -1,9 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { Workshop, UserProfile, PageRoute } from '../types';
 import { INITIAL_WORKSHOPS, INITIAL_USER } from '../data/mockData';
+import { supabase } from '../lib/supabase';
+import type { User, Session } from '@supabase/supabase-js';
 
 interface WorkifyContextType {
   isLoggedIn: boolean;
+  authLoading: boolean;
+  authUser: User | null;
   login: () => void;
   logout: () => void;
   currentPage: PageRoute;
@@ -29,7 +33,8 @@ interface WorkifyContextType {
 const WorkifyContext = createContext<WorkifyContextType | undefined>(undefined);
 
 export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+  const [authUser, setAuthUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<PageRoute>('landing');
   const [selectedWorkshopId, setSelectedWorkshopId] = useState<string | null>('wk-linkedin');
   const [workshops, setWorkshops] = useState<Workshop[]>(INITIAL_WORKSHOPS);
@@ -37,8 +42,60 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [hostedWorkshopIds, setHostedWorkshopIds] = useState<string[]>([]);
   const [isHostModalOpen, setIsHostModalOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
-  const [userProfile] = useState<UserProfile>(INITIAL_USER);
   const [darkMode, setDarkMode] = useState<boolean>(false);
+
+  const isLoggedIn = !!authUser;
+
+  // Build a userProfile from the auth user's metadata, falling back to INITIAL_USER shape
+  const userProfile: UserProfile = authUser
+    ? {
+        id: authUser.id,
+        name: authUser.user_metadata?.full_name ?? authUser.user_metadata?.name ?? 'User',
+        handle: '@' + (authUser.user_metadata?.preferred_username ?? authUser.email?.split('@')[0] ?? 'user'),
+        headline: 'Builder',
+        avatarUrl: authUser.user_metadata?.avatar_url ?? '/workify-logo.png',
+        bio: '',
+        location: '',
+        companyOrSchool: '',
+        skills: [],
+        links: { linkedin: '', portfolio: '' },
+      }
+    : INITIAL_USER;
+
+  // Listen for auth state changes (session restore on reload + OAuth callback)
+  useEffect(() => {
+    // Get the initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      handleSession(session);
+      setAuthLoading(false);
+    });
+
+    // Subscribe to future auth events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleSession(session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSession = (session: Session | null) => {
+    if (session?.user) {
+      setAuthUser(session.user);
+    } else {
+      setAuthUser(null);
+    }
+  };
+
+  // When a session appears while on the landing page, navigate to workshops
+  useEffect(() => {
+    if (isLoggedIn && currentPage === 'landing') {
+      setCurrentPage('workshops');
+      setIsAuthModalOpen(false);
+    }
+  }, [isLoggedIn, currentPage]);
 
   useEffect(() => {
     if (darkMode) {
@@ -52,18 +109,24 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setDarkMode(prev => !prev);
   };
 
-  const login = () => {
-    setIsLoggedIn(true);
-    setIsAuthModalOpen(false);
-    if (currentPage === 'landing') {
-      setCurrentPage('workshops');
+  const login = useCallback(async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+    if (error) {
+      console.error('Google sign-in error:', error.message);
     }
-  };
+    // The page will redirect to Google — on return, onAuthStateChange picks up the session.
+  }, []);
 
-  const logout = () => {
-    setIsLoggedIn(false);
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
+    setAuthUser(null);
     setCurrentPage('landing');
-  };
+  }, []);
 
   const openWorkshopDetail = (workshopId: string) => {
     setSelectedWorkshopId(workshopId);
@@ -124,14 +187,27 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setWorkshops(prev => prev.filter(w => w.id !== id));
   };
 
+  // Guard protected pages: signed-out users go to landing + auth modal
+  const guardedSetCurrentPage = useCallback((page: PageRoute) => {
+    const protectedPages: PageRoute[] = ['workshops', 'workshop-detail', 'dashboard', 'profile'];
+    if (protectedPages.includes(page) && !authUser) {
+      setCurrentPage('landing');
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setCurrentPage(page);
+  }, [authUser]);
+
   return (
     <WorkifyContext.Provider
       value={{
         isLoggedIn,
+        authLoading,
+        authUser,
         login,
         logout,
         currentPage,
-        setCurrentPage,
+        setCurrentPage: guardedSetCurrentPage,
         selectedWorkshopId,
         openWorkshopDetail,
         workshops,

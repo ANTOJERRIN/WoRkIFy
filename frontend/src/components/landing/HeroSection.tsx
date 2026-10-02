@@ -3,7 +3,7 @@ import { useWorkify } from '../../context/WorkifyContext';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export const HeroSection: React.FC = () => {
-  const { login, setCurrentPage } = useWorkify();
+  const { setIsAuthModalOpen } = useWorkify();
 
   return (
     <section className="relative w-full py-16 md:py-24 overflow-hidden bg-[#FAFAFC] dark:bg-[#070C1F] transition-colors">
@@ -39,10 +39,7 @@ export const HeroSection: React.FC = () => {
           {/* CTAs */}
           <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
             <button
-              onClick={() => {
-                login();
-                setCurrentPage('workshops');
-              }}
+              onClick={() => setIsAuthModalOpen(true)}
               className="inline-flex items-center justify-center gap-2.5 h-12 px-7 rounded-xl bg-[#2F6BFF] text-white font-semibold text-sm shadow-sm hover:bg-[#1F54E0] hover:shadow-lg transition-all duration-200 group"
             >
               <span>Get started</span>
@@ -50,10 +47,7 @@ export const HeroSection: React.FC = () => {
             </button>
 
             <button
-              onClick={() => {
-                login();
-                setCurrentPage('workshops');
-              }}
+              onClick={() => setIsAuthModalOpen(true)}
               className="inline-flex items-center justify-center h-12 px-7 rounded-xl bg-white dark:bg-white/5 text-[#070C1F] dark:text-white font-semibold text-sm shadow-sm border border-[#DDE0E8] dark:border-white/10 hover:bg-[#F3F4F7] dark:hover:bg-white/10 transition-all duration-200"
             >
               Sign in to continue

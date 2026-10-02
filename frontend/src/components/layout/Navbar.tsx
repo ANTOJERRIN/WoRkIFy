@@ -5,7 +5,6 @@ import { Sun, Moon, Plus, User, LogOut, ChevronDown, Menu, X, Sparkles } from 'l
 export const Navbar: React.FC = () => {
   const {
     isLoggedIn,
-    login,
     logout,
     currentPage,
     setCurrentPage,
@@ -46,20 +45,7 @@ export const Navbar: React.FC = () => {
               </span>
             </div>
           </button>
-
-          {/* Quick status pill for testing preview states */}
-          <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-[#DDE0E8] dark:border-white/10 text-xs text-[#636875] dark:text-gray-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>{isLoggedIn ? 'Logged in view' : 'Logged out view'}</span>
-            <button
-              onClick={() => (isLoggedIn ? logout() : login())}
-              className="ml-1 text-[11px] underline text-[#2F6BFF] hover:text-[#1F54E0] font-medium"
-            >
-              (switch)
-            </button>
-          </div>
         </div>
-
         {/* Center: Logged-in Nav Links */}
         {isLoggedIn ? (
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
@@ -263,7 +249,7 @@ export const Navbar: React.FC = () => {
           ) : (
             <button
               onClick={() => {
-                login();
+                setIsAuthModalOpen(true);
                 setIsMobileMenuOpen(false);
               }}
               className="w-full py-2.5 rounded-xl bg-[#2F6BFF] text-white font-semibold text-center"
