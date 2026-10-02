@@ -23,7 +23,7 @@ export const WhyWorkifySection: React.FC = () => {
       num: '03',
       title: 'Turn skills into opportunity',
       subtitle: 'Projects become proof of what you can do',
-      description: 'Every workshop culminates in a verified build submission. Your code repository and deployment URL are anchored to your Workify Public Profile as cryptographically verifiable proof for hiring teams.',
+      description: 'Every workshop focuses on building a functional project. Apply modern tools, grow your technical skills, and showcase hands-on work on your Workify profile.',
       icon: Award,
       accent: 'from-emerald-500 to-teal-600'
     }

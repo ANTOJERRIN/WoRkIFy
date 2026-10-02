@@ -3,6 +3,11 @@ import { ExternalLink, Sparkles, Terminal, Code2 } from 'lucide-react';
 import { F1FORGE_URL } from '../../config/site';
 
 export const F1ForgeSection: React.FC = () => {
+  const isF1ForgeUrlConfigured =
+    Boolean(F1FORGE_URL) &&
+    !F1FORGE_URL.includes('[FILL') &&
+    F1FORGE_URL.startsWith('http');
+
   return (
     <section className="w-full py-24 bg-[#FAFAFC] dark:bg-[#070C1F] border-t border-[#DDE0E8]/50 dark:border-white/5 transition-colors relative overflow-hidden">
       {/* Background glow */}
@@ -22,14 +27,18 @@ export const F1ForgeSection: React.FC = () => {
 
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#070C1F] dark:text-white tracking-tight mb-5 font-['Plus_Jakarta_Sans',sans-serif]">
               Built by{' '}
-              <a
-                href={F1FORGE_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="hover:underline hover:text-[#2F6BFF] transition-colors"
-              >
-                F1 Forge
-              </a>
+              {isF1ForgeUrlConfigured ? (
+                <a
+                  href={F1FORGE_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:underline hover:text-[#2F6BFF] transition-colors"
+                >
+                  F1 Forge
+                </a>
+              ) : (
+                <span>F1 Forge</span>
+              )}
               .
             </h2>
 
@@ -46,8 +55,8 @@ export const F1ForgeSection: React.FC = () => {
 
               <div className="p-4 rounded-2xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10">
                 <Terminal className="w-5 h-5 text-[#8B4CFF] mb-2" />
-                <p className="text-xs font-bold text-[#070C1F] dark:text-white">Verifiable Artifacts</p>
-                <p className="text-[11px] text-[#636875] dark:text-gray-400">Code repositories as credentials</p>
+                <p className="text-xs font-bold text-[#070C1F] dark:text-white">Applied Engineering</p>
+                <p className="text-[11px] text-[#636875] dark:text-gray-400">Practical builds that solve real problems</p>
               </div>
             </div>
           </div>
@@ -70,18 +79,20 @@ export const F1ForgeSection: React.FC = () => {
               </div>
 
               <p className="text-xs text-[#636875] dark:text-gray-300 leading-relaxed mb-6">
-                Building AI agent platforms, verified builder portfolios, and production systems for engineering clubs and technology pioneers.
+                Building AI agent platforms, developer tools, and practical engineering workshops for students and builders.
               </p>
 
-              <a
-                href={F1FORGE_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-3 px-5 rounded-xl bg-[#2F6BFF] hover:bg-[#1F54E0] text-white text-xs font-semibold flex items-center justify-between transition-colors shadow-sm"
-              >
-                <span>Visit F1 Forge</span>
-                <ExternalLink className="w-4 h-4" />
-              </a>
+              {isF1ForgeUrlConfigured && (
+                <a
+                  href={F1FORGE_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-3 px-5 rounded-xl bg-[#2F6BFF] hover:bg-[#1F54E0] text-white text-xs font-semibold flex items-center justify-between transition-colors shadow-sm"
+                >
+                  <span>Visit F1 Forge</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
 
             </div>
           </div>

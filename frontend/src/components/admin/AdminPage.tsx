@@ -25,13 +25,11 @@ import {
   CheckCircle2,
   AlertCircle,
   X,
-  Calendar,
-  Clock,
   ExternalLink
 } from 'lucide-react';
 
 export const AdminPage: React.FC = () => {
-  const { isAdmin, workshops, reloadWorkshops, setCurrentPage } = useWorkify();
+  const { isAdmin, workshops, reloadWorkshops } = useWorkify();
 
   const [activeTab, setActiveTab] = useState<'workshops' | 'registrations' | 'reviews'>('workshops');
   const [selectedWorkshopId, setSelectedWorkshopId] = useState<string>(workshops[0]?.id || '');
@@ -59,11 +57,6 @@ export const AdminPage: React.FC = () => {
   const [submittingWorkshop, setSubmittingWorkshop] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Non-admins see nothing
-  if (!isAdmin) {
-    return null;
-  }
-
   // Load meet link, registrations, and reviews when selected workshop changes
   const loadWorkshopData = useCallback(async (wId: string) => {
     if (!wId) return;
@@ -86,12 +79,18 @@ export const AdminPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (!isAdmin) return;
     if (selectedWorkshopId) {
       loadWorkshopData(selectedWorkshopId);
     } else if (workshops.length > 0) {
       setSelectedWorkshopId(workshops[0].id);
     }
-  }, [selectedWorkshopId, workshops, loadWorkshopData]);
+  }, [isAdmin, selectedWorkshopId, workshops, loadWorkshopData]);
+
+  // Non-admins see nothing
+  if (!isAdmin) {
+    return null;
+  }
 
   const handleSaveMeetUrl = async (e: React.FormEvent) => {
     e.preventDefault();

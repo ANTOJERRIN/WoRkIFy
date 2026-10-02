@@ -3,7 +3,9 @@ import { useWorkify } from '../../context/WorkifyContext';
 import { formatWorkshopDateIST } from '../../api/workshops';
 import { listUserRegistrationsWithWorkshops } from '../../api/registrations';
 import { getWorkshopMeetUrl, getJoinState, type JoinState } from '../../api/links';
-import type { RegistrationWithWorkshop } from '../../types';
+import { listUserLinkedInReviews } from '../../api/reviews';
+import type { RegistrationWithWorkshop, LinkedInReview } from '../../types';
+import { LinkedInReviewModal } from '../reviews/LinkedInReviewModal';
 import {
   Calendar,
   Clock,
@@ -11,19 +13,24 @@ import {
   Loader2,
   AlertCircle,
   Video,
-  ExternalLink
+  ExternalLink,
+  Award
 } from 'lucide-react';
 
 interface DashboardWorkshopCardProps {
   registration: RegistrationWithWorkshop;
+  review?: LinkedInReview | null;
   onOpenDetail: (id: string) => void;
   onCancelRegistration: (id: string) => void;
+  onOpenReview: (w: { id: string; title: string }, review: LinkedInReview | null) => void;
 }
 
 const DashboardWorkshopCard: React.FC<DashboardWorkshopCardProps> = ({
   registration,
+  review,
   onOpenDetail,
-  onCancelRegistration
+  onCancelRegistration,
+  onOpenReview,
 }) => {
   const w = registration.workshop;
   const dateFormatted = formatWorkshopDateIST(w.startsAt, w.endsAt);
@@ -105,9 +112,30 @@ const DashboardWorkshopCard: React.FC<DashboardWorkshopCardProps> = ({
           )}
 
           {joinState.status === 'ended' && (
-            <span className="text-xs text-[#636875] dark:text-gray-400">
-              Workshop ended
-            </span>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[11px] text-[#636875] dark:text-gray-400">
+                Workshop ended
+              </span>
+              {review ? (
+                <button
+                  type="button"
+                  onClick={() => onOpenReview({ id: w.id, title: w.title }, review)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-bold border border-purple-500/20 transition-colors"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>View Review ({review.overallScore}/100)</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenReview({ id: w.id, title: w.title }, null)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#8B4CFF] to-[#2F6BFF] hover:opacity-90 text-white text-xs font-bold shadow-sm transition-all"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Get your LinkedIn review</span>
+                </button>
+              )}
+            </div>
           )}
 
           {joinState.status === 'no_link' && (
@@ -118,7 +146,7 @@ const DashboardWorkshopCard: React.FC<DashboardWorkshopCardProps> = ({
 
           <button
             onClick={() => onCancelRegistration(w.id)}
-            className="text-xs text-[#636875] hover:text-red-500 underline"
+            className="text-xs text-[#636875] hover:text-red-500 underline self-start"
           >
             Cancel
           </button>

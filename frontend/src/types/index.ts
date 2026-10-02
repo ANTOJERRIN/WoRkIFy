@@ -66,4 +66,33 @@ export interface AdminReviewItem {
   userName?: string;
 }
 
+export type ReviewBand = 'Needs work' | 'Developing' | 'Strong' | 'Standout';
+
+export interface CriterionScore {
+  score: number;
+  feedback: string;
+}
+
+export interface ReviewCriteria {
+  headline: CriterionScore;
+  about: CriterionScore;
+  experience: CriterionScore;
+  skills: CriterionScore;
+  visibility: CriterionScore;
+}
+
+export interface LinkedInReview {
+  id: string;
+  userId: string;
+  workshopId: string;
+  workshopTitle?: string;
+  linkedinUrl: string;
+  overallScore: number;
+  band: ReviewBand;
+  criteria: ReviewCriteria;
+  strengths: string;
+  improvements: string;
+  createdAt: string;
+}
+
 export type PageRoute = 'landing' | 'workshops' | 'workshop-detail' | 'dashboard' | 'profile' | 'admin';
