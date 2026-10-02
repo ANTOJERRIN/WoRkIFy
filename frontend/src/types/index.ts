@@ -26,17 +26,44 @@ export interface RegistrationWithWorkshop {
 export interface UserProfile {
   id: string;
   name: string;
+  email: string;
   handle: string;
-  headline: string;
-  avatarUrl: string;
   bio: string;
+  avatarUrl: string;
+  college: string;
   location: string;
-  companyOrSchool: string;
   skills: string[];
   links: {
     linkedin?: string;
-    portfolio?: string;
+    x?: string;
+    website?: string;
   };
 }
 
-export type PageRoute = 'landing' | 'workshops' | 'workshop-detail' | 'dashboard' | 'profile';
+export interface AdminRegistrationItem {
+  id: string;
+  userId: string;
+  workshopId: string;
+  createdAt: string;
+  profile: {
+    name: string;
+    email: string;
+    handle: string;
+    linkedinUrl: string;
+  } | null;
+}
+
+export interface AdminReviewItem {
+  id: string;
+  userId: string;
+  workshopId: string;
+  linkedinUrl: string;
+  overallScore: number;
+  band: string;
+  strengths: string;
+  improvements: string;
+  createdAt: string;
+  userName?: string;
+}
+
+export type PageRoute = 'landing' | 'workshops' | 'workshop-detail' | 'dashboard' | 'profile' | 'admin';

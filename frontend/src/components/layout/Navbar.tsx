@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useWorkify } from '../../context/WorkifyContext';
-import { Sun, Moon, Plus, User, LogOut, ChevronDown, Menu, X, Sparkles } from 'lucide-react';
+import { Sun, Moon, Plus, User, LogOut, ChevronDown, Menu, X, Sparkles, Shield } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const {
     isLoggedIn,
+    isAdmin,
     logout,
     currentPage,
     setCurrentPage,
@@ -90,6 +91,23 @@ export const Navbar: React.FC = () => {
                 <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-[#2F6BFF] rounded-full"></span>
               )}
             </button>
+
+            {isAdmin && (
+              <button
+                onClick={() => setCurrentPage('admin')}
+                className={`relative py-1 transition-colors flex items-center gap-1.5 ${
+                  currentPage === 'admin'
+                    ? 'text-[#070C1F] dark:text-white font-semibold'
+                    : 'text-[#636875] dark:text-gray-400 hover:text-[#070C1F] dark:hover:text-white'
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5 text-amber-500" />
+                <span>Admin</span>
+                {currentPage === 'admin' && (
+                  <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-amber-500 rounded-full"></span>
+                )}
+              </button>
+            )}
           </nav>
         ) : (
           <div className="hidden md:flex items-center text-xs text-[#636875] dark:text-gray-400">
@@ -143,7 +161,9 @@ export const Navbar: React.FC = () => {
                       <div className="font-semibold text-[#070C1F] dark:text-white">
                         <span>{userProfile.name}</span>
                       </div>
-                      <p className="text-xs text-[#636875] dark:text-gray-400 truncate">{userProfile.handle}</p>
+                      <p className="text-xs text-[#636875] dark:text-gray-400 truncate">
+                        {userProfile.handle ? `@${userProfile.handle.replace(/^@/, '')}` : ''}
+                      </p>
                     </div>
 
                     <button
@@ -167,6 +187,19 @@ export const Navbar: React.FC = () => {
                       <Sparkles className="w-4 h-4 text-[#8B4CFF]" />
                       <span>My Workshops</span>
                     </button>
+
+                    {isAdmin && (
+                      <button
+                        onClick={() => {
+                          setCurrentPage('admin');
+                          setIsAvatarMenuOpen(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/20 flex items-center gap-2 font-semibold"
+                      >
+                        <Shield className="w-4 h-4 text-amber-500" />
+                        <span>Admin Console</span>
+                      </button>
+                    )}
 
                     <div className="border-t border-[#DDE0E8] dark:border-white/10 my-1"></div>
 
@@ -236,6 +269,18 @@ export const Navbar: React.FC = () => {
               >
                 Profile
               </button>
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    setCurrentPage('admin');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full text-left py-2 font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5"
+                >
+                  <Shield className="w-4 h-4 text-amber-500" />
+                  <span>Admin Console</span>
+                </button>
+              )}
               <button
                 onClick={() => {
                   logout();

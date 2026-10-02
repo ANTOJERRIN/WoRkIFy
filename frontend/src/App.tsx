@@ -7,6 +7,7 @@ import { WorkshopsPage } from './components/workshops/WorkshopsPage';
 import { WorkshopDetailPage } from './components/workshops/WorkshopDetailPage';
 import { DashboardPage } from './components/dashboard/DashboardPage';
 import { ProfilePage } from './components/profile/ProfilePage';
+import { AdminPage } from './components/admin/AdminPage';
 import { HostWorkshopModal } from './components/workshops/HostWorkshopModal';
 import { AuthModal } from './components/auth/AuthModal';
 
@@ -25,6 +26,8 @@ const AppContent: React.FC = () => {
         return <DashboardPage />;
       case 'profile':
         return <ProfilePage />;
+      case 'admin':
+        return <AdminPage />;
       default:
         return <LandingPage />;
     }

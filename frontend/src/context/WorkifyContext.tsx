@@ -8,10 +8,13 @@ import {
   registerForWorkshop as apiRegister,
   unregister as apiUnregister,
 } from '../api/workshops';
+import { getProfile } from '../api/profile';
+import { checkIsAdmin } from '../api/admin';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface WorkifyContextType {
   isLoggedIn: boolean;
+  isAdmin: boolean;
   authLoading: boolean;
   authUser: User | null;
   login: () => void;
@@ -33,6 +36,8 @@ interface WorkifyContextType {
   isAuthModalOpen: boolean;
   setIsAuthModalOpen: (open: boolean) => void;
   userProfile: UserProfile;
+  reloadProfile: () => Promise<void>;
+  setUserProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
   darkMode: boolean;
   toggleDarkMode: () => void;
 }
@@ -41,6 +46,7 @@ const WorkifyContext = createContext<WorkifyContextType | undefined>(undefined);
 
 export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [authUser, setAuthUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<PageRoute>('landing');
   const [selectedWorkshopId, setSelectedWorkshopId] = useState<string | null>(null);
@@ -52,24 +58,63 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isHostModalOpen, setIsHostModalOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [darkMode, setDarkMode] = useState<boolean>(false);
+  const [userProfile, setUserProfile] = useState<UserProfile>(INITIAL_USER);
 
   const isLoggedIn = !!authUser;
 
-  // Build a userProfile from the auth user's metadata, falling back to INITIAL_USER shape
-  const userProfile: UserProfile = authUser
-    ? {
-        id: authUser.id,
-        name: authUser.user_metadata?.full_name ?? authUser.user_metadata?.name ?? 'User',
-        handle: '@' + (authUser.user_metadata?.preferred_username ?? authUser.email?.split('@')[0] ?? 'user'),
-        headline: 'Builder',
-        avatarUrl: authUser.user_metadata?.avatar_url ?? '/workify-logo.png',
-        bio: '',
-        location: '',
-        companyOrSchool: '',
-        skills: [],
-        links: { linkedin: '', portfolio: '' },
+  // Load profile from Supabase profiles table
+  const reloadProfile = useCallback(async () => {
+    if (!authUser) {
+      setUserProfile(INITIAL_USER);
+      return;
+    }
+    try {
+      const dbProfile = await getProfile();
+      if (dbProfile) {
+        setUserProfile(dbProfile);
+      } else {
+        // Fallback to auth metadata if DB row trigger hasn't finished yet
+        setUserProfile({
+          id: authUser.id,
+          name: authUser.user_metadata?.full_name ?? authUser.user_metadata?.name ?? 'User',
+          email: authUser.email || '',
+          handle: (authUser.user_metadata?.preferred_username ?? authUser.email?.split('@')[0] ?? 'user').toLowerCase(),
+          avatarUrl: authUser.user_metadata?.avatar_url ?? '/workify-logo.png',
+          bio: '',
+          location: '',
+          college: '',
+          skills: [],
+          links: { linkedin: '', x: '', website: '' },
+        });
       }
-    : INITIAL_USER;
+    } catch (err) {
+      console.error('Failed to load user profile:', err);
+    }
+  }, [authUser]);
+
+  // Check admin role
+  const checkAdminStatus = useCallback(async () => {
+    if (!authUser) {
+      setIsAdmin(false);
+      return;
+    }
+    try {
+      const admin = await checkIsAdmin();
+      setIsAdmin(admin);
+    } catch {
+      setIsAdmin(false);
+    }
+  }, [authUser]);
+
+  useEffect(() => {
+    if (authUser) {
+      reloadProfile();
+      checkAdminStatus();
+    } else {
+      setUserProfile(INITIAL_USER);
+      setIsAdmin(false);
+    }
+  }, [authUser, reloadProfile, checkAdminStatus]);
 
   // Fetch workshops from Supabase
   const loadWorkshops = useCallback(async () => {
@@ -108,7 +153,9 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setAuthUser(session.user);
     } else {
       setAuthUser(null);
+      setIsAdmin(false);
       setRegisteredWorkshopIds([]);
+      setUserProfile(INITIAL_USER);
     }
   };
 
@@ -177,7 +224,9 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setAuthUser(null);
+    setIsAdmin(false);
     setRegisteredWorkshopIds([]);
+    setUserProfile(INITIAL_USER);
     setCurrentPage('landing');
   }, []);
 
@@ -218,20 +267,27 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   // Guard protected pages: signed-out users go to landing + auth modal
+  // Non-admins attempting to access 'admin' go to 'workshops'
   const guardedSetCurrentPage = useCallback((page: PageRoute) => {
-    const protectedPages: PageRoute[] = ['workshops', 'workshop-detail', 'dashboard', 'profile'];
+    const protectedPages: PageRoute[] = ['workshops', 'workshop-detail', 'dashboard', 'profile', 'admin'];
     if (protectedPages.includes(page) && !authUser) {
       setCurrentPage('landing');
       setIsAuthModalOpen(true);
       return;
     }
+    if (page === 'admin' && !isAdmin) {
+      // Non-admins cannot access admin page
+      setCurrentPage('workshops');
+      return;
+    }
     setCurrentPage(page);
-  }, [authUser]);
+  }, [authUser, isAdmin]);
 
   return (
     <WorkifyContext.Provider
       value={{
         isLoggedIn,
+        isAdmin,
         authLoading,
         authUser,
         login,
@@ -253,6 +309,8 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         isAuthModalOpen,
         setIsAuthModalOpen,
         userProfile,
+        reloadProfile,
+        setUserProfile,
         darkMode,
         toggleDarkMode,
       }}

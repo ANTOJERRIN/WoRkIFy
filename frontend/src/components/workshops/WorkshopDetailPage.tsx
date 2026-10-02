@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useWorkify } from '../../context/WorkifyContext';
 import { formatWorkshopDateIST } from '../../api/workshops';
+import { getWorkshopMeetUrl, getJoinState, type JoinState } from '../../api/links';
 import {
   ArrowLeft,
   Calendar,
@@ -8,7 +9,8 @@ import {
   CheckCircle2,
   Share2,
   Check,
-  AlertCircle
+  AlertCircle,
+  ExternalLink
 } from 'lucide-react';
 
 export const WorkshopDetailPage: React.FC = () => {
@@ -23,11 +25,41 @@ export const WorkshopDetailPage: React.FC = () => {
   } = useWorkify();
 
   const [copiedLink, setCopiedLink] = useState(false);
+  const [meetUrl, setMeetUrl] = useState<string | null>(null);
+  const [joinState, setJoinState] = useState<JoinState>({ status: 'no_link' });
 
   const workshop = workshops.find(w => w.id === selectedWorkshopId || w.slug === selectedWorkshopId);
   const isRegistered = workshop ? registeredWorkshopIds.includes(workshop.id) : false;
   const isComingSoon = workshop?.status === 'coming_soon';
   const isRegistering = workshop ? registeringWorkshopId === workshop.id : false;
+
+  // Fetch Meet URL only if user is registered
+  const fetchLink = useCallback(async () => {
+    if (!workshop || !isRegistered) {
+      setMeetUrl(null);
+      return;
+    }
+    const url = await getWorkshopMeetUrl(workshop.id);
+    setMeetUrl(url);
+  }, [workshop, isRegistered]);
+
+  useEffect(() => {
+    fetchLink();
+  }, [fetchLink]);
+
+  // Update join state every minute to handle time-based window transitions
+  useEffect(() => {
+    if (!workshop) return;
+
+    const updateState = () => {
+      const state = getJoinState(workshop.startsAt, workshop.endsAt, meetUrl);
+      setJoinState(state);
+    };
+
+    updateState();
+    const interval = setInterval(updateState, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [workshop, meetUrl]);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -144,6 +176,39 @@ export const WorkshopDetailPage: React.FC = () => {
                   <span>Registered ✓</span>
                 </div>
 
+                {/* Gated Join Meet Button / Join State Indicator */}
+                {joinState.status === 'active' && (
+                  <a
+                    href={joinState.meetUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-[#2F6BFF] hover:bg-[#1F54E0] text-white font-semibold text-sm shadow-md transition-colors"
+                  >
+                    <Video className="w-4 h-4" />
+                    <span>Join Google Meet</span>
+                    <ExternalLink className="w-3.5 h-3.5 ml-1" />
+                  </a>
+                )}
+
+                {joinState.status === 'upcoming' && (
+                  <span className="inline-flex items-center gap-1.5 h-12 px-5 rounded-xl bg-[#F3F4F7] dark:bg-white/10 text-[#636875] dark:text-gray-300 text-xs font-semibold">
+                    <Video className="w-3.5 h-3.5 text-blue-500" />
+                    <span>Starts {formatWorkshopDateIST(workshop.startsAt, null)} (Join opens 15m prior)</span>
+                  </span>
+                )}
+
+                {joinState.status === 'ended' && (
+                  <span className="inline-flex items-center h-12 px-5 rounded-xl bg-gray-100 dark:bg-white/5 text-[#636875] dark:text-gray-400 text-xs font-semibold">
+                    Workshop ended
+                  </span>
+                )}
+
+                {joinState.status === 'no_link' && (
+                  <span className="inline-flex items-center h-12 px-5 rounded-xl bg-[#F3F4F7] dark:bg-white/10 text-[#636875] dark:text-gray-300 text-xs font-semibold">
+                    Link will be shared soon
+                  </span>
+                )}
+
                 <button
                   onClick={() => unregisterFromWorkshop(workshop.id)}
                   className="text-xs text-[#636875] hover:text-red-500 underline ml-2"
@@ -174,7 +239,7 @@ export const WorkshopDetailPage: React.FC = () => {
 
           <div className="mt-4 flex items-center gap-2 text-xs text-[#636875] dark:text-gray-400">
             <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
-            <span>Workshops run live over Google Meet. Gated meeting link is accessible to registered attendees.</span>
+            <span>Workshops run live over Google Meet. Gated link opens 15 minutes before session starts until conclusion.</span>
           </div>
         </div>
 
