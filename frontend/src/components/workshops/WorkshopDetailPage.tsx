@@ -15,6 +15,7 @@ import {
 
 export const WorkshopDetailPage: React.FC = () => {
   const {
+    isLoggedIn,
     selectedWorkshopId,
     workshops,
     setCurrentPage,
@@ -29,7 +30,7 @@ export const WorkshopDetailPage: React.FC = () => {
   const [joinState, setJoinState] = useState<JoinState>({ status: 'no_link' });
 
   const workshop = workshops.find(w => w.id === selectedWorkshopId || w.slug === selectedWorkshopId);
-  const isRegistered = workshop ? registeredWorkshopIds.includes(workshop.id) : false;
+  const isRegistered = isLoggedIn && workshop ? registeredWorkshopIds.includes(workshop.id) : false;
   const isComingSoon = workshop?.status === 'coming_soon';
   const isRegistering = workshop ? registeringWorkshopId === workshop.id : false;
 

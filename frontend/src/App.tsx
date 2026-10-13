@@ -12,7 +12,7 @@ import { HostWorkshopModal } from './components/workshops/HostWorkshopModal';
 import { AuthModal } from './components/auth/AuthModal';
 
 const AppContent: React.FC = () => {
-  const { currentPage } = useWorkify();
+  const { currentPage, isLoggedIn, isAdmin } = useWorkify();
 
   const renderCurrentPage = () => {
     switch (currentPage) {
@@ -23,11 +23,11 @@ const AppContent: React.FC = () => {
       case 'workshop-detail':
         return <WorkshopDetailPage />;
       case 'dashboard':
-        return <DashboardPage />;
+        return isLoggedIn ? <DashboardPage /> : <LandingPage />;
       case 'profile':
-        return <ProfilePage />;
+        return isLoggedIn ? <ProfilePage /> : <LandingPage />;
       case 'admin':
-        return <AdminPage />;
+        return isLoggedIn && isAdmin ? <AdminPage /> : <LandingPage />;
       default:
         return <LandingPage />;
     }
