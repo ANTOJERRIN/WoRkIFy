@@ -17,7 +17,6 @@ interface WorkifyContextType {
   isAdmin: boolean;
   authLoading: boolean;
   authUser: User | null;
-  login: () => void;
   logout: () => void;
   currentPage: PageRoute;
   setCurrentPage: (page: PageRoute) => void;
@@ -154,6 +153,8 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } else {
       setAuthUser(null);
       setIsAdmin(false);
+      setIsHostModalOpen(false);
+      setCurrentPage(page => ['dashboard', 'profile', 'admin'].includes(page) ? 'landing' : page);
       setRegisteredWorkshopIds([]);
       setUserProfile(INITIAL_USER);
     }
@@ -209,18 +210,6 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setDarkMode(prev => !prev);
   };
 
-  const login = useCallback(async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      },
-    });
-    if (error) {
-      console.error('Google sign-in error:', error.message);
-    }
-  }, []);
-
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setAuthUser(null);
@@ -266,10 +255,18 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  // Guard protected pages: signed-out users go to landing + auth modal
+  const guardedSetIsHostModalOpen = useCallback((open: boolean) => {
+    if (open && !authUser) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsHostModalOpen(open);
+  }, [authUser]);
+
+  // Workshop listings and details are public; account pages require a session.
   // Non-admins attempting to access 'admin' go to 'workshops'
   const guardedSetCurrentPage = useCallback((page: PageRoute) => {
-    const protectedPages: PageRoute[] = ['workshops', 'workshop-detail', 'dashboard', 'profile', 'admin'];
+    const protectedPages: PageRoute[] = ['dashboard', 'profile', 'admin'];
     if (protectedPages.includes(page) && !authUser) {
       setCurrentPage('landing');
       setIsAuthModalOpen(true);
@@ -290,7 +287,6 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         isAdmin,
         authLoading,
         authUser,
-        login,
         logout,
         currentPage,
         setCurrentPage: guardedSetCurrentPage,
@@ -305,7 +301,7 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         registerForWorkshop,
         unregisterFromWorkshop,
         isHostModalOpen,
-        setIsHostModalOpen,
+        setIsHostModalOpen: guardedSetIsHostModalOpen,
         isAuthModalOpen,
         setIsAuthModalOpen,
         userProfile,

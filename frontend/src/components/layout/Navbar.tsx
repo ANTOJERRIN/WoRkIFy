@@ -10,7 +10,6 @@ export const Navbar: React.FC = () => {
     currentPage,
     setCurrentPage,
     setIsHostModalOpen,
-    setIsAuthModalOpen,
     userProfile,
     darkMode,
     toggleDarkMode
@@ -24,7 +23,7 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
 
         {/* Left: Brand Logo & Wordmark */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 shrink-0">
           <button
             onClick={() => setCurrentPage(isLoggedIn ? 'workshops' : 'landing')}
             className="flex items-center gap-3 group focus:outline-none text-left"
@@ -116,7 +115,7 @@ export const Navbar: React.FC = () => {
         )}
 
         {/* Right Actions: Logged In vs Logged Out */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Dark / Light Mode Toggle */}
           <button
             onClick={toggleDarkMode}
@@ -218,17 +217,18 @@ export const Navbar: React.FC = () => {
               </div>
             </>
           ) : (
-            /* Logged-out state: "Sign in" only */
+            /* Public workshop navigation */
             <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-white dark:bg-white/5 border border-[#DDE0E8] dark:border-white/15 text-[#070C1F] dark:text-white font-semibold text-sm hover:bg-[#F3F4F7] dark:hover:bg-white/10 transition-colors shadow-sm"
+              onClick={() => setCurrentPage('workshops')}
+              className="inline-flex items-center justify-center min-h-10 px-3 sm:px-5 rounded-xl bg-white dark:bg-white/5 border border-[#DDE0E8] dark:border-white/15 text-[#070C1F] dark:text-white font-semibold text-sm hover:bg-[#F3F4F7] dark:hover:bg-white/10 transition-colors shadow-sm"
             >
-              Sign in
+              Explore workshops
             </button>
           )}
 
           {/* Mobile menu trigger */}
           <button
+            aria-label="Toggle navigation"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="md:hidden p-2 rounded-xl text-[#636875] hover:text-[#070C1F] dark:text-gray-300"
           >
@@ -294,12 +294,12 @@ export const Navbar: React.FC = () => {
           ) : (
             <button
               onClick={() => {
-                setIsAuthModalOpen(true);
+                setCurrentPage('workshops');
                 setIsMobileMenuOpen(false);
               }}
               className="w-full py-2.5 rounded-xl bg-[#2F6BFF] text-white font-semibold text-center"
             >
-              Sign in to Workify
+              Explore workshops
             </button>
           )}
         </div>

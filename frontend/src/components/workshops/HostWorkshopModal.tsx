@@ -4,9 +4,9 @@ import { HOST_CONTACT_NUMBER } from '../../config/site';
 import { X, Sparkles, PhoneCall } from 'lucide-react';
 
 export const HostWorkshopModal: React.FC = () => {
-  const { isHostModalOpen, setIsHostModalOpen } = useWorkify();
+  const { isLoggedIn, isHostModalOpen, setIsHostModalOpen } = useWorkify();
 
-  if (!isHostModalOpen) return null;
+  if (!isLoggedIn || !isHostModalOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
