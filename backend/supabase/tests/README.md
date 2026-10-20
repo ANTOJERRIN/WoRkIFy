@@ -1,5 +1,16 @@
 # Public browsing regression checks
 
+The local archival regression runner applies the source schema, public-read and
+archival migrations to disposable in-memory PostgreSQL, then runs this SQL suite:
+
+```sh
+npm run test:db
+```
+
+It also verifies historical record preservation, archived access restrictions,
+exact-ID targeting, missing-ID behavior and metadata mismatch rejection. No cloud
+credentials are used. See `docs/linkedin-retirement.md` for release limitations.
+
 Run `public_workshop_browsing.sql` as postgres against a disposable Supabase
 database with the migrations applied. For example:
 

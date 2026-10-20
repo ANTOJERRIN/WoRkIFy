@@ -1,31 +1,27 @@
-# Supabase Migrations
+# Supabase migrations
 
-This folder holds SQL migration files for the Workify database schema.
+SQL files in this folder are version-controlled migration sources. Frontend
+installation and builds run from the repository root; this directory is not
+another npm application.
 
-## Linking your Supabase project
+Create a local migration from the repository root:
 
-1. Install the Supabase CLI: `npm install -g supabase`
-2. Log in: `supabase login`
-3. Link your project (run from the repo root):
-   ```bash
-   supabase link --project-ref <your-project-ref>
-   ```
-   You can find your project ref in the Supabase dashboard under **Settings > General**.
-4. To apply migrations:
-   ```bash
-   supabase db push
-   ```
-5. To pull the current remote schema:
-   ```bash
-   supabase db pull
-   ```
-
-## Migration file naming
-
-Files are named with a timestamp prefix so they run in order:
-```
-20261002000000_create_profiles.sql
-20261002000001_create_workshops.sql
+```powershell
+npx.cmd supabase --workdir backend migration new descriptive_name
 ```
 
-**Do not apply migrations without reviewing them first.**
+Use `npx` instead of `npx.cmd` on other shells. The CLI generates the timestamped
+filename. Read the generated SQL and run relevant disposable database tests with
+`npm run test:db`. The runner verifies the source schema, public browsing and
+archival changes without connecting to Supabase cloud.
+
+Applying migrations is a separate release action. First verify the intended
+project, effective schema/policies and applied migration history. The inspected
+project has schema/history drift, so do not blindly replay the original schema,
+seed inserts or every local migration using `db push`.
+
+The public-read and archival migrations remain unapplied in that project. Their
+scope and release requirements are documented in
+[public browsing](../../../docs/public-browsing.md) and
+[LinkedIn retirement](../../../docs/linkedin-retirement.md). No historical data
+cleanup or cloud change is authorized by the local layout consolidation.

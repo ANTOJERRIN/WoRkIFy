@@ -36,9 +36,9 @@ archived or deleted here; stage 03 owns LinkedIn retirement.
 
 ## Changed areas
 
-- `frontend/src/api/workshops.ts`, `frontend/src/lib/supabase.ts`: public response
+- `src/api/workshops.ts`, `src/lib/supabase.ts`: public response
   contract and independent anonymous reads.
-- `frontend/src/context/WorkifyContext.tsx`: stable/race-safe catalog loading,
+- `src/context/WorkifyContext.tsx`: stable/race-safe catalog loading,
   failed-session handling and overlay cleanup on navigation/logout.
 - Auth and hosting modals plus `components/layout/useModalDialog.ts`: Escape,
   focus containment/restoration, inert background and scroll locking.
@@ -84,8 +84,7 @@ inspected. These are local fixture results, not deployed-site verification.
 
 ## Required release steps; no deployment performed
 
-Read-only checks on 20 October 2026 against the project referenced by
-`.env.example` (`epgsgvwdlwarktbjrdfn`) found:
+Read-only checks on 20 October 2026 against the project identified during the initial diagnosis (`epgsgvwdlwarktbjrdfn`) found:
 
 - `anon` has no `SELECT` privilege or read policy for `workshops`.
 - `anon` has no SELECT/INSERT/UPDATE/DELETE privileges for profiles,

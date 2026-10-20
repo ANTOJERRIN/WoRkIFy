@@ -12,6 +12,7 @@ dist
 dist-ssr
 test-results/
 playwright-report/
+backend/supabase/.temp/
 *.local
 
 # Environment files (keep .env.example as template)
