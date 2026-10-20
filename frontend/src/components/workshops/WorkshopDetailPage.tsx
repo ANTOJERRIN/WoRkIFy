@@ -8,6 +8,7 @@ import {
   Video,
   CheckCircle2,
   Share2,
+  Loader2,
   Check,
   AlertCircle,
   ExternalLink
@@ -18,6 +19,9 @@ export const WorkshopDetailPage: React.FC = () => {
     isLoggedIn,
     selectedWorkshopId,
     workshops,
+    workshopsLoading,
+    workshopsError,
+    reloadWorkshops,
     setCurrentPage,
     registeredWorkshopIds,
     registerForWorkshop,
@@ -79,6 +83,26 @@ export const WorkshopDetailPage: React.FC = () => {
     const gCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${details}&location=Google+Meet`;
     window.open(gCalUrl, '_blank');
   };
+
+  if (!workshop && workshopsLoading) {
+    return (
+      <div role="status" className="w-full py-24 flex flex-col items-center justify-center text-center">
+        <Loader2 className="w-8 h-8 text-[#2F6BFF] animate-spin mb-3" />
+        <p className="text-sm text-[#636875] dark:text-gray-400">Loading workshop...</p>
+      </div>
+    );
+  }
+
+  if (!workshop && workshopsError) {
+    return (
+      <div role="alert" className="w-full py-16 flex flex-col items-center justify-center text-center gap-4">
+        <p className="text-sm text-red-600 dark:text-red-400">{workshopsError}</p>
+        <button onClick={() => reloadWorkshops()} className="px-5 py-2 rounded-xl bg-[#2F6BFF] text-white text-xs font-semibold hover:bg-[#1F54E0] transition-colors">
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   if (!workshop) {
     return (

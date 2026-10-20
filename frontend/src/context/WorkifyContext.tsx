@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import type { Workshop, UserProfile, PageRoute } from '../types';
 import { INITIAL_USER } from '../data/mockData';
 import { supabase } from '../lib/supabase';
@@ -60,6 +60,7 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [userProfile, setUserProfile] = useState<UserProfile>(INITIAL_USER);
 
   const isLoggedIn = !!authUser;
+  const catalogRequest = useRef(0);
 
   // Load profile from Supabase profiles table
   const reloadProfile = useCallback(async () => {
@@ -117,21 +118,22 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Fetch workshops from Supabase
   const loadWorkshops = useCallback(async () => {
+    const request = ++catalogRequest.current;
     setWorkshopsLoading(true);
     setWorkshopsError(null);
     try {
       const data = await listWorkshops();
+      if (request !== catalogRequest.current) return;
       setWorkshops(data);
-      if (data.length > 0 && !selectedWorkshopId) {
-        setSelectedWorkshopId(data[0].id);
-      }
+      setSelectedWorkshopId(current => current ?? data[0]?.id ?? null);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to load workshops';
-      setWorkshopsError(msg);
+      if (request !== catalogRequest.current) return;
+      console.error('Failed to load public workshops:', err);
+      setWorkshopsError('Workshops could not be loaded. Please try again.');
     } finally {
-      setWorkshopsLoading(false);
+      if (request === catalogRequest.current) setWorkshopsLoading(false);
     }
-  }, [selectedWorkshopId]);
+  }, []);
 
   // Fetch user registrations
   const loadRegistrations = useCallback(async () => {
@@ -154,6 +156,7 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setAuthUser(null);
       setIsAdmin(false);
       setIsHostModalOpen(false);
+      setIsAuthModalOpen(false);
       setCurrentPage(page => ['dashboard', 'profile', 'admin'].includes(page) ? 'landing' : page);
       setRegisteredWorkshopIds([]);
       setUserProfile(INITIAL_USER);
@@ -167,16 +170,28 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Listen for auth state changes
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    let active = true;
+    let authEventReceived = false;
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (!active || authEventReceived) return;
+      if (error) console.error('Session restoration failed:', error);
+      handleSession(error ? null : session);
+    }).catch(error => {
+      if (!active || authEventReceived) return;
+      console.error('Session restoration failed:', error);
+      handleSession(null);
+    }).finally(() => {
+      if (active) setAuthLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      authEventReceived = true;
       handleSession(session);
       setAuthLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      handleSession(session);
-    });
-
     return () => {
+      active = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -211,6 +226,8 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const logout = useCallback(async () => {
+    setIsAuthModalOpen(false);
+    setIsHostModalOpen(false);
     await supabase.auth.signOut();
     setAuthUser(null);
     setIsAdmin(false);
@@ -220,6 +237,8 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const openWorkshopDetail = (workshopId: string) => {
+    setIsAuthModalOpen(false);
+    setIsHostModalOpen(false);
     setSelectedWorkshopId(workshopId);
     setCurrentPage('workshop-detail');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -266,6 +285,8 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Workshop listings and details are public; account pages require a session.
   // Non-admins attempting to access 'admin' go to 'workshops'
   const guardedSetCurrentPage = useCallback((page: PageRoute) => {
+    setIsAuthModalOpen(false);
+    setIsHostModalOpen(false);
     const protectedPages: PageRoute[] = ['dashboard', 'profile', 'admin'];
     if (protectedPages.includes(page) && !authUser) {
       setCurrentPage('landing');

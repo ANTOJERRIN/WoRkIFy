@@ -36,7 +36,7 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#FAFAFC] dark:bg-[#070C1F] text-[#070C1F] dark:text-[#F3F4F7] transition-colors duration-200">
       <Navbar />
-      <main className="flex-1 w-full">
+      <main tabIndex={-1} className="flex-1 w-full">
         {renderCurrentPage()}
       </main>
       <Footer />

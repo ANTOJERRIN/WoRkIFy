@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useWorkify } from '../../context/WorkifyContext';
 import { WorkshopCard } from './WorkshopCard';
 import { WorkshopFilters } from './WorkshopFilters';
@@ -7,11 +7,23 @@ import { Sparkles, CalendarX, Plus, Loader2, AlertCircle } from 'lucide-react';
 export const WorkshopsPage: React.FC = () => {
   const { workshops, workshopsLoading, workshopsError, reloadWorkshops, setIsHostModalOpen } = useWorkify();
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  // Use the existing schedule/status fields until stage 08 centralizes lifecycle.
+  // Keep the full context catalog intact for historical detail and account views.
+  const upcomingWorkshops = useMemo(() => workshops.filter(workshop =>
+    workshop.status !== 'cancelled' && (!workshop.endsAt || new Date(workshop.endsAt).getTime() > now)
+  ), [workshops, now]);
 
   const filteredWorkshops = useMemo(() => {
-    return workshops.filter((w) => {
+    return upcomingWorkshops.filter((w) => {
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
+        const q = searchQuery.trim().toLowerCase();
         const matchesTitle = w.title.toLowerCase().includes(q);
         const matchesDesc = w.shortDescription.toLowerCase().includes(q) || w.fullDescription.toLowerCase().includes(q);
         const matchesHost = w.hostName.toLowerCase().includes(q);
@@ -22,7 +34,7 @@ export const WorkshopsPage: React.FC = () => {
       }
       return true;
     });
-  }, [workshops, searchQuery]);
+  }, [upcomingWorkshops, searchQuery]);
 
   return (
     <div className="w-full py-10 md:py-16 bg-[#FAFAFC] dark:bg-[#070C1F] min-h-[calc(100vh-4rem)] transition-colors">
@@ -62,7 +74,7 @@ export const WorkshopsPage: React.FC = () => {
 
         {/* Loading State */}
         {workshopsLoading && (
-          <div className="w-full py-24 flex flex-col items-center justify-center text-center">
+          <div role="status" className="w-full py-24 flex flex-col items-center justify-center text-center">
             <Loader2 className="w-8 h-8 text-[#2F6BFF] animate-spin mb-3" />
             <p className="text-sm text-[#636875] dark:text-gray-400">Loading workshops...</p>
           </div>
@@ -70,7 +82,7 @@ export const WorkshopsPage: React.FC = () => {
 
         {/* Error State */}
         {!workshopsLoading && workshopsError && (
-          <div className="w-full py-16 px-6 rounded-3xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/40 flex flex-col items-center justify-center text-center">
+          <div role="alert" className="w-full py-16 px-6 rounded-3xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/40 flex flex-col items-center justify-center text-center">
             <AlertCircle className="w-8 h-8 text-red-500 mb-3" />
             <h3 className="text-base font-bold text-red-900 dark:text-red-200 mb-1">
               Failed to load workshops
@@ -101,12 +113,14 @@ export const WorkshopsPage: React.FC = () => {
                 <CalendarX className="w-8 h-8" />
               </div>
               <h3 className="text-lg font-bold text-[#070C1F] dark:text-white mb-1">
-                No workshops found
+                {upcomingWorkshops.length === 0 ? 'No upcoming workshops yet.' : 'No workshops match your search.'}
               </h3>
               <p className="text-sm text-[#636875] dark:text-gray-400 max-w-sm mb-6">
-                There are no workshops matching your search. Try searching for a different keyword or host one yourself.
+                {upcomingWorkshops.length === 0
+                  ? 'Check back soon for new workshop announcements.'
+                  : 'Try a different title, host, or tag.'}
               </p>
-              {searchQuery && (
+              {searchQuery.trim() && upcomingWorkshops.length > 0 && (
                 <button
                   onClick={() => setSearchQuery('')}
                   className="px-5 py-2 rounded-xl bg-[#F3F4F7] dark:bg-white/10 text-[#070C1F] dark:text-white text-xs font-semibold hover:bg-[#DDE0E8] transition-colors"

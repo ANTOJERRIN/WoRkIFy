@@ -17,16 +17,8 @@ export const WorkshopCard: React.FC<WorkshopCardProps> = ({ workshop }) => {
 
   return (
     <div
-      onClick={() => {
-        if (!isComingSoon) {
-          openWorkshopDetail(workshop.id);
-        }
-      }}
-      className={`rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 p-6 flex flex-col justify-between transition-all duration-200 ${
-        isComingSoon
-          ? 'opacity-65 cursor-not-allowed select-none'
-          : 'cursor-pointer group hover:border-[#2F6BFF]/40 dark:hover:border-[#2F6BFF]/40 card-hover-elevation'
-      }`}
+      onClick={() => openWorkshopDetail(workshop.id)}
+      className={`rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 p-6 flex flex-col justify-between transition-all duration-200 cursor-pointer group hover:border-[#2F6BFF]/40 dark:hover:border-[#2F6BFF]/40 card-hover-elevation ${isComingSoon ? 'opacity-65' : ''}`}
     >
       <div>
         {/* Top Badges: Status / Tag & Mode Tag */}
@@ -103,15 +95,16 @@ export const WorkshopCard: React.FC<WorkshopCardProps> = ({ workshop }) => {
             </button>
           )}
 
-          {!isComingSoon && (
-            <button
-              onClick={() => openWorkshopDetail(workshop.id)}
-              className="p-1 rounded-lg text-[#636875] group-hover:text-[#2F6BFF] transition-colors"
-              title="View Details"
-            >
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          )}
+          <button
+            onClick={(event) => {
+              event.stopPropagation();
+              openWorkshopDetail(workshop.id);
+            }}
+            className="p-1 rounded-lg text-[#636875] group-hover:text-[#2F6BFF] transition-colors"
+            title="View Details"
+          >
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
         </div>
       </div>
     </div>

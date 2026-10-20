@@ -1,16 +1,24 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useModalDialog } from '../layout/useModalDialog';
 import { useWorkify } from '../../context/WorkifyContext';
 import { HOST_CONTACT_NUMBER } from '../../config/site';
 import { X, Sparkles, PhoneCall } from 'lucide-react';
 
 export const HostWorkshopModal: React.FC = () => {
   const { isLoggedIn, isHostModalOpen, setIsHostModalOpen } = useWorkify();
+  const closeDialog = useCallback(() => setIsHostModalOpen(false), [setIsHostModalOpen]);
+  const dialogRef = useModalDialog(isLoggedIn && isHostModalOpen, closeDialog);
 
   if (!isLoggedIn || !isHostModalOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div
+        ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Host a Workshop"
         className="w-full max-w-md rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 shadow-2xl p-6 sm:p-8 relative"
         onClick={(e) => e.stopPropagation()}
       >
@@ -30,6 +38,7 @@ export const HostWorkshopModal: React.FC = () => {
           </div>
 
           <button
+            aria-label="Close"
             onClick={() => setIsHostModalOpen(false)}
             className="p-1.5 rounded-xl text-[#636875] hover:text-[#070C1F] dark:text-gray-400 dark:hover:text-white hover:bg-[#F3F4F7] dark:hover:bg-white/5 transition-colors"
           >

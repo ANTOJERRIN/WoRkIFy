@@ -1,15 +1,20 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useModalDialog } from '../layout/useModalDialog';
 import { useWorkify } from '../../context/WorkifyContext';
 import { X } from 'lucide-react';
 
 export const AuthModal: React.FC = () => {
   const { isAuthModalOpen, setIsAuthModalOpen, setCurrentPage } = useWorkify();
+  const closeDialog = useCallback(() => setIsAuthModalOpen(false), [setIsAuthModalOpen]);
+  const dialogRef = useModalDialog(isAuthModalOpen, closeDialog);
 
   if (!isAuthModalOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label="Sign-in temporarily unavailable"

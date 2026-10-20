@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { publicSupabase, supabase } from '../lib/supabase';
 import type { Workshop } from '../types';
 
 export interface DbWorkshop {
@@ -18,7 +18,11 @@ export interface DbWorkshop {
   updated_at: string;
 }
 
-export function mapDbWorkshopToWorkshop(row: DbWorkshop): Workshop {
+// Explicit public contract: no meeting URL, attendee data or account information.
+export const PUBLIC_WORKSHOP_FIELDS = 'id,slug,title,host_name,mode,starts_at,ends_at,timezone,status,short_description,full_description,tags' as const;
+type PublicWorkshopRow = Omit<DbWorkshop, 'created_at' | 'updated_at'>;
+
+export function mapDbWorkshopToWorkshop(row: PublicWorkshopRow): Workshop {
   return {
     id: row.id,
     slug: row.slug,
@@ -98,16 +102,18 @@ export function formatWorkshopDateIST(startsAt: string | null, endsAt: string | 
  * List all workshops ordered by status and starts_at
  */
 export async function listWorkshops(): Promise<Workshop[]> {
-  const { data, error } = await supabase
+  const { data, error } = await publicSupabase
     .from('workshops')
-    .select('*')
+    .select(PUBLIC_WORKSHOP_FIELDS)
+    .abortSignal(AbortSignal.timeout(15000))
     .order('starts_at', { ascending: true, nullsFirst: false });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return (data as DbWorkshop[]).map(mapDbWorkshopToWorkshop);
+  if (!data) throw new Error('The workshop service returned no response. Please try again.');
+  return data.map(mapDbWorkshopToWorkshop);
 }
 
 /**
@@ -116,7 +122,8 @@ export async function listWorkshops(): Promise<Workshop[]> {
 export async function getWorkshop(idOrSlug: string): Promise<Workshop | null> {
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug);
 
-  const query = supabase.from('workshops').select('*');
+  const query = publicSupabase.from('workshops').select(PUBLIC_WORKSHOP_FIELDS)
+    .abortSignal(AbortSignal.timeout(15000));
   const { data, error } = isUuid
     ? await query.eq('id', idOrSlug).maybeSingle()
     : await query.eq('slug', idOrSlug).maybeSingle();
@@ -126,7 +133,7 @@ export async function getWorkshop(idOrSlug: string): Promise<Workshop | null> {
   }
 
   if (!data) return null;
-  return mapDbWorkshopToWorkshop(data as DbWorkshop);
+  return mapDbWorkshopToWorkshop(data);
 }
 
 /**
