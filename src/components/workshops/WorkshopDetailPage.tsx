@@ -3,6 +3,7 @@ import { useWorkify } from '../../context/WorkifyContext';
 import { formatWorkshopDateIST, getWorkshop } from '../../api/workshops';
 import type { Workshop } from '../../types';
 import { getWorkshopMeetUrl, getJoinState, type JoinState } from '../../api/links';
+import { workshopPath } from '../../routing/routes';
 import {
   ArrowLeft,
   Calendar,
@@ -31,6 +32,7 @@ export const WorkshopDetailPage: React.FC = () => {
   } = useWorkify();
 
   const [copiedLink, setCopiedLink] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
   const [meetUrl, setMeetUrl] = useState<string | null>(null);
   const [joinState, setJoinState] = useState<JoinState>({ status: 'no_link' });
 
@@ -88,10 +90,18 @@ export const WorkshopDetailPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [workshop, meetUrl]);
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
+  const handleCopyLink = async () => {
+    if (!workshop) return;
+    const url = new URL(workshopPath(workshop.slug || workshop.id), window.location.origin).href;
+    setShareError(null);
+    setCopiedLink(false);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    } catch {
+      setShareError(url);
+    }
   };
 
   const handleAddToCalendar = () => {
@@ -198,7 +208,10 @@ export const WorkshopDetailPage: React.FC = () => {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#070C1F] dark:text-white tracking-tight mb-4 font-['Plus_Jakarta_Sans',sans-serif] leading-tight">
             {workshop.title}
           </h1>
-
+          {shareError && <div role="status" className="mb-6 text-sm">
+            <p>Could not copy the link. Select and copy it below.</p>
+            <input aria-label="Workshop share link" readOnly value={shareError} onFocus={event => event.target.select()} className="w-full mt-2 p-2 rounded border border-[#DDE0E8] dark:bg-[#070C1F]" />
+          </div>}
 
           <p className="text-base sm:text-lg text-[#636875] dark:text-gray-300 leading-relaxed mb-8 max-w-3xl">
             {workshop.shortDescription}

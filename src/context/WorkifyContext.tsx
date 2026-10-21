@@ -11,11 +11,14 @@ import {
 import { getProfile } from '../api/profile';
 import { checkIsAdmin } from '../api/admin';
 import type { User, Session } from '@supabase/supabase-js';
+import { useUrlRoute } from '../routing/useUrlRoute';
+import { pagePath, workshopPath } from '../routing/routes';
 
 interface WorkifyContextType {
   isLoggedIn: boolean;
   isAdmin: boolean;
   authLoading: boolean;
+  adminLoading: boolean;
   authUser: User | null;
   logout: () => void;
   currentPage: PageRoute;
@@ -45,13 +48,9 @@ const WorkifyContext = createContext<WorkifyContextType | undefined>(undefined);
 
 export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [authUser, setAuthUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [adminResult, setAdminResult] = useState<{ userId: string; allowed: boolean } | null>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
-  // Resolve shared/historical IDs or slugs without requiring discovery to list
-  // the row. Stage 05 will consolidate URL routing and browser navigation.
-  const [initialWorkshopId] = useState(() => new URLSearchParams(window.location.search).get('workshop'));
-  const [currentPage, setCurrentPage] = useState<PageRoute>(initialWorkshopId ? 'workshop-detail' : 'landing');
-  const [selectedWorkshopId, setSelectedWorkshopId] = useState<string | null>(initialWorkshopId);
+  const { currentPage, selectedWorkshopId, navigate } = useUrlRoute();
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [workshopsLoading, setWorkshopsLoading] = useState<boolean>(true);
   const [workshopsError, setWorkshopsError] = useState<string | null>(null);
@@ -63,6 +62,8 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [userProfile, setUserProfile] = useState<UserProfile>(INITIAL_USER);
 
   const isLoggedIn = !!authUser;
+  const adminLoading = !!authUser && adminResult?.userId !== authUser.id;
+  const isAdmin = !!authUser && adminResult?.userId === authUser.id && adminResult.allowed;
   const catalogRequest = useRef(0);
 
   // Load profile from Supabase profiles table
@@ -95,29 +96,25 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [authUser]);
 
-  // Check admin role
-  const checkAdminStatus = useCallback(async () => {
-    if (!authUser) {
-      setIsAdmin(false);
-      return;
-    }
-    try {
-      const admin = await checkIsAdmin();
-      setIsAdmin(admin);
-    } catch {
-      setIsAdmin(false);
-    }
+  // Resolve role separately from the session and ignore stale account results.
+  useEffect(() => {
+    if (!authUser) { setAdminResult(null); return; }
+    let active = true;
+    checkIsAdmin().then(allowed => {
+      if (active) setAdminResult({ userId: authUser.id, allowed });
+    }).catch(() => {
+      if (active) setAdminResult({ userId: authUser.id, allowed: false });
+    });
+    return () => { active = false; };
   }, [authUser]);
 
   useEffect(() => {
     if (authUser) {
       reloadProfile();
-      checkAdminStatus();
     } else {
       setUserProfile(INITIAL_USER);
-      setIsAdmin(false);
     }
-  }, [authUser, reloadProfile, checkAdminStatus]);
+  }, [authUser, reloadProfile]);
 
   // Fetch workshops from Supabase
   const loadWorkshops = useCallback(async () => {
@@ -128,7 +125,6 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const data = await listWorkshops();
       if (request !== catalogRequest.current) return;
       setWorkshops(data);
-      setSelectedWorkshopId(current => current ?? data[0]?.id ?? null);
     } catch (err: unknown) {
       if (request !== catalogRequest.current) return;
       console.error('Failed to load public workshops:', err);
@@ -157,10 +153,9 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setAuthUser(session.user);
     } else {
       setAuthUser(null);
-      setIsAdmin(false);
+      setAdminResult(null);
       setIsHostModalOpen(false);
       setIsAuthModalOpen(false);
-      setCurrentPage(page => ['dashboard', 'profile', 'admin'].includes(page) ? 'landing' : page);
       setRegisteredWorkshopIds([]);
       setUserProfile(INITIAL_USER);
     }
@@ -208,13 +203,11 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [authUser, loadRegistrations]);
 
-  // When a session appears while on the landing page, navigate to workshops
+  // Any route change, including browser Back/Forward, dismisses stale overlays.
   useEffect(() => {
-    if (isLoggedIn && currentPage === 'landing') {
-      setCurrentPage('workshops');
-      setIsAuthModalOpen(false);
-    }
-  }, [isLoggedIn, currentPage]);
+    setIsAuthModalOpen(false);
+    setIsHostModalOpen(false);
+  }, [currentPage, selectedWorkshopId]);
 
   useEffect(() => {
     if (darkMode) {
@@ -233,18 +226,16 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsHostModalOpen(false);
     await supabase.auth.signOut();
     setAuthUser(null);
-    setIsAdmin(false);
+    setAdminResult(null);
     setRegisteredWorkshopIds([]);
     setUserProfile(INITIAL_USER);
-    setCurrentPage('landing');
-  }, []);
+    navigate('/');
+  }, [navigate]);
 
   const openWorkshopDetail = (workshopId: string) => {
     setIsAuthModalOpen(false);
     setIsHostModalOpen(false);
-    setSelectedWorkshopId(workshopId);
-    setCurrentPage('workshop-detail');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigate(workshopPath(workshopId));
   };
 
   const registerForWorkshop = async (id: string) => {
@@ -285,24 +276,12 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsHostModalOpen(open);
   }, [authUser]);
 
-  // Workshop listings and details are public; account pages require a session.
-  // Non-admins attempting to access 'admin' go to 'workshops'
+  // URL selection is independent of authentication. The page shell guards content.
   const guardedSetCurrentPage = useCallback((page: PageRoute) => {
     setIsAuthModalOpen(false);
     setIsHostModalOpen(false);
-    const protectedPages: PageRoute[] = ['dashboard', 'profile', 'admin'];
-    if (protectedPages.includes(page) && !authUser) {
-      setCurrentPage('landing');
-      setIsAuthModalOpen(true);
-      return;
-    }
-    if (page === 'admin' && !isAdmin) {
-      // Non-admins cannot access admin page
-      setCurrentPage('workshops');
-      return;
-    }
-    setCurrentPage(page);
-  }, [authUser, isAdmin]);
+    navigate(pagePath(page));
+  }, [navigate]);
 
   return (
     <WorkifyContext.Provider
@@ -310,6 +289,7 @@ export const WorkifyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         isLoggedIn,
         isAdmin,
         authLoading,
+        adminLoading,
         authUser,
         logout,
         currentPage,

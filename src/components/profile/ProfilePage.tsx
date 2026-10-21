@@ -7,8 +7,6 @@ import type { RegistrationWithWorkshop, UserProfile } from '../../types';
 import {
   ExternalLink,
   Globe,
-  Share2,
-  Check,
   Sparkles,
   Edit3,
   Clock,
@@ -18,21 +16,11 @@ import {
 
 export const ProfilePage: React.FC = () => {
   const { userProfile, setUserProfile, reloadProfile, authUser, openWorkshopDetail } = useWorkify();
-  const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [registrations, setRegistrations] = useState<RegistrationWithWorkshop[]>([]);
   const [loadingRegistrations, setLoadingRegistrations] = useState(true);
 
   const displayHandle = userProfile.handle ? `@${userProfile.handle.replace(/^@/, '')}` : '';
-
-  const handleShare = () => {
-    const url = displayHandle
-      ? `${window.location.origin}?profile=${userProfile.handle.replace(/^@/, '')}`
-      : window.location.href;
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const loadRegisteredWorkshops = useCallback(async () => {
     if (!authUser) {
@@ -131,7 +119,7 @@ export const ProfilePage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Actions: Edit & Share Profile */}
+                {/* Actions: Edit Profile */}
                 <div className="flex items-center gap-2 self-start sm:self-auto">
                   <button
                     onClick={() => setIsEditing(true)}
@@ -139,14 +127,6 @@ export const ProfilePage: React.FC = () => {
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>Edit Profile</span>
-                  </button>
-
-                  <button
-                    onClick={handleShare}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#F3F4F7] dark:bg-white/10 hover:bg-[#DDE0E8] dark:hover:bg-white/15 text-[#070C1F] dark:text-white text-xs font-semibold transition-colors shadow-sm"
-                  >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5 text-[#2F6BFF]" />}
-                    <span>{copied ? 'Copied!' : 'Share'}</span>
                   </button>
 
 

@@ -9,11 +9,16 @@ import { HostWorkshopModal } from '../../src/components/workshops/HostWorkshopMo
 import { DashboardPage } from '../../src/components/dashboard/DashboardPage';
 import { ProfilePage } from '../../src/components/profile/ProfilePage';
 import { AdminPage } from '../../src/components/admin/AdminPage';
+import { AppContent } from '../../src/App';
+import { RouteGuard } from '../../src/routing/RouteGuard';
 import '../../src/index.css';
 
 const mode = new URLSearchParams(location.search).get('session');
 if (mode === 'reject') supabase.auth.getSession = () => Promise.reject(new Error('Test session failure'));
-if (mode === 'pending') supabase.auth.getSession = () => new Promise(() => {});
+if (mode === 'pending') {
+  supabase.auth.getSession = () => new Promise(() => {});
+  supabase.auth.onAuthStateChange = () => ({ data: { subscription: { id: 'pending', callback: () => {}, unsubscribe: () => {} } } });
+}
 
 export function Driver() {
   const state = useWorkify();
@@ -34,13 +39,13 @@ export function Driver() {
     </header>
     <main tabIndex={-1}>
       {state.currentPage === 'workshop-detail' ? <WorkshopDetailPage />
-        : state.currentPage === 'dashboard' ? <DashboardPage />
-        : state.currentPage === 'profile' ? <ProfilePage />
-        : state.currentPage === 'admin' ? <AdminPage />
+        : state.currentPage === 'dashboard' ? <RouteGuard><DashboardPage /></RouteGuard>
+        : state.currentPage === 'profile' ? <RouteGuard><ProfilePage /></RouteGuard>
+        : state.currentPage === 'admin' ? <RouteGuard admin><AdminPage /></RouteGuard>
         : <WorkshopsPage />}
     </main>
     <AuthModal /><HostWorkshopModal />
   </>;
 }
 
-createRoot(document.getElementById('root')!).render(<WorkifyProvider><Driver /></WorkifyProvider>);
+createRoot(document.getElementById('root')!).render(<WorkifyProvider>{new URLSearchParams(location.search).has('shell') ? <AppContent /> : <Driver />}</WorkifyProvider>);

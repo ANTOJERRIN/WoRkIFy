@@ -121,6 +121,7 @@ login is unavailable.
 
 The LinkedIn review feature is retired from source. Its archival migration is
 unapplied in the inspected project; historical data remains. Meeting URLs stay
-private. Full routing and further lifecycle/access work belong to later prompts.
+private. URL routing is implemented in prompt 05; further session and
+lifecycle/access work belong to later prompts. See [routing and hosting requirements](docs/url-routing.md).
 Registration does not prove attendance, completion, certification or assessment
 success. No cloud migration or deployment is part of these local edits.

@@ -170,11 +170,14 @@ test('ended and cancelled workshops do not populate the upcoming catalog', async
 test('stale dialogs close on public navigation and logout; private actions stay guarded', async ({ page }) => {
   const requests = await mockCatalog(page);
   await harness(page);
-  for (const label of ['Private dashboard', 'Private profile', 'Private admin', 'Open host']) {
+  for (const label of ['Private dashboard', 'Private profile', 'Private admin']) {
     await page.getByRole('button', { name: label, exact: true }).click();
-    await expect(page.getByRole('dialog', { name: 'Sign-in temporarily unavailable' })).toBeVisible();
-    await page.keyboard.press('Escape');
+    await expect(page.getByRole('heading', { name: 'Sign-in temporarily unavailable', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /My Registered Workshops|Registered Workshops|Admin Portal/ })).toHaveCount(0);
   }
+  await page.getByRole('button', { name: 'Open host', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Sign-in temporarily unavailable' })).toBeVisible();
+  await page.keyboard.press('Escape');
   const before = requests.length;
   await page.getByRole('button', { name: 'Cancel registration', exact: true }).click();
   expect(requests.slice(before)).toEqual([]);

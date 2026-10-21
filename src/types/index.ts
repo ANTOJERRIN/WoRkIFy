@@ -53,4 +53,4 @@ export interface AdminRegistrationItem {
   } | null;
 }
 
-export type PageRoute = 'landing' | 'workshops' | 'workshop-detail' | 'dashboard' | 'profile' | 'admin';
+export type PageRoute = 'landing' | 'workshops' | 'workshop-detail' | 'dashboard' | 'profile' | 'admin' | 'not-found';

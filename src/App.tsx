@@ -10,9 +10,10 @@ import { ProfilePage } from './components/profile/ProfilePage';
 import { AdminPage } from './components/admin/AdminPage';
 import { HostWorkshopModal } from './components/workshops/HostWorkshopModal';
 import { AuthModal } from './components/auth/AuthModal';
+import { RouteGuard } from './routing/RouteGuard';
 
-const AppContent: React.FC = () => {
-  const { currentPage, isLoggedIn, isAdmin } = useWorkify();
+export const AppContent: React.FC = () => {
+  const { currentPage, selectedWorkshopId, setCurrentPage } = useWorkify();
 
   const renderCurrentPage = () => {
     switch (currentPage) {
@@ -21,15 +22,19 @@ const AppContent: React.FC = () => {
       case 'workshops':
         return <WorkshopsPage />;
       case 'workshop-detail':
-        return <WorkshopDetailPage />;
+        return <WorkshopDetailPage key={selectedWorkshopId} />;
       case 'dashboard':
-        return isLoggedIn ? <DashboardPage /> : <LandingPage />;
+        return <RouteGuard><DashboardPage /></RouteGuard>;
       case 'profile':
-        return isLoggedIn ? <ProfilePage /> : <LandingPage />;
+        return <RouteGuard><ProfilePage /></RouteGuard>;
       case 'admin':
-        return isLoggedIn && isAdmin ? <AdminPage /> : <LandingPage />;
+        return <RouteGuard admin><AdminPage /></RouteGuard>;
       default:
-        return <LandingPage />;
+        return <section className="px-6 py-24 text-center">
+          <h1 className="text-3xl font-bold mb-4">Page not found</h1>
+          <p className="mb-6">This address does not match a Workify page.</p>
+          <button onClick={() => setCurrentPage('workshops')} className="px-5 py-3 rounded-xl bg-[#2F6BFF] text-white text-sm font-semibold">Explore workshops</button>
+        </section>;
     }
   };
 
