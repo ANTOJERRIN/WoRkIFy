@@ -14,7 +14,13 @@ async function mockCatalog(page: Page, rows = [workshop]) {
   await page.route('https://workify-browser-test.supabase.co/**', async route => {
     requests.push(route.request().url());
     if (new URL(route.request().url()).pathname === '/rest/v1/workshops') {
-      await route.fulfill({ json: rows });
+      const params = new URL(route.request().url()).searchParams;
+      const result = rows.filter(row =>
+        (params.get('status') !== 'neq.archived' || row.status !== 'archived') &&
+        (!params.has('id') || params.get('id') === `eq.${row.id}`) &&
+        (!params.has('slug') || params.get('slug') === `eq.${row.slug}`)
+      );
+      await route.fulfill({ json: result });
     } else {
       await route.fulfill({ status: 401, json: { message: 'No test session' } });
     }
