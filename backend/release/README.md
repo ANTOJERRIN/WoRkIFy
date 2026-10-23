@@ -8,7 +8,8 @@ recreating tables, replaying seed workshops or deleting history.
 ## Production hotfix on 23 October 2026
 
 The existing public-workshop-browsing and archive-LinkedIn migrations were applied
-to production independently to restore public browsing. The old snapshot and
+to production independently to restore public browsing. A subsequent anonymous
+visibility policy hides archived rows from older clients. The old snapshot and
 atomic candidate below describe the PRE-HOTFIX schema and will now intentionally
 fail their drift guard. Do not replay that candidate or remove its guard. Capture
 a fresh baseline and assemble only the remaining unapplied changes before the
