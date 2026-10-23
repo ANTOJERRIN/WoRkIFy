@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import { useModalDialog } from '../layout/useModalDialog';
 import { useWorkify } from '../../context/WorkifyContext';
-import { HOST_CONTACT_NUMBER } from '../../config/site';
 import { X, Sparkles, PhoneCall } from 'lucide-react';
+import { HOST_CONTACT_NUMBER } from '../../config/site';
 
 export const HostWorkshopModal: React.FC = () => {
   const { isLoggedIn, isHostModalOpen, setIsHostModalOpen } = useWorkify();
@@ -55,13 +55,13 @@ export const HostWorkshopModal: React.FC = () => {
             <span className="text-xs font-semibold text-[#636875] dark:text-gray-400 block mb-2">
               Direct Contact
             </span>
-            <a
+            {HOST_CONTACT_NUMBER ? <a
               href={`tel:${HOST_CONTACT_NUMBER}`}
               className="inline-flex items-center gap-2 text-base font-bold text-[#2F6BFF] hover:text-[#1F54E0] transition-colors"
             >
               <PhoneCall className="w-4 h-4" />
               <span>{HOST_CONTACT_NUMBER}</span>
-            </a>
+            </a> : <p className="text-sm text-[#636875] dark:text-gray-400">Host contact is temporarily unavailable. Please try again later.</p>}
           </div>
 
           <button

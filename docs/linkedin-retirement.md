@@ -21,6 +21,13 @@ with nonempty history. No cloud data was updated.
 
 ## One archived publication state
 
+Prompt 08 reconciliation (21 October 2026): a new read-only check reconfirmed
+host **F1 Forge** for the same exact target. The unapplied migration's erroneous
+`ForMa` guard was corrected to F1 Forge, retaining the UUID, slug, title and
+timestamp guards. The earlier fixture/report discrepancy is resolved locally;
+changed metadata, including ForMa, is still rejected. Nothing was archived in
+the cloud. See `docs/workshop-lifecycle.md` for the current lifecycle contract.
+
 The local migration is:
 
 `backend/supabase/migrations/20261020123021_archive_linkedin_workshop.sql`

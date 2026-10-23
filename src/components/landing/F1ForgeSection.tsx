@@ -3,10 +3,7 @@ import { ExternalLink, Sparkles, Terminal, Code2 } from 'lucide-react';
 import { F1FORGE_URL } from '../../config/site';
 
 export const F1ForgeSection: React.FC = () => {
-  const isF1ForgeUrlConfigured =
-    Boolean(F1FORGE_URL) &&
-    !F1FORGE_URL.includes('[FILL') &&
-    F1FORGE_URL.startsWith('http');
+  const isF1ForgeUrlConfigured = Boolean(F1FORGE_URL);
 
   return (
     <section className="w-full py-24 bg-[#FAFAFC] dark:bg-[#070C1F] border-t border-[#DDE0E8]/50 dark:border-white/5 transition-colors relative overflow-hidden">

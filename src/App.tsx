@@ -11,9 +11,11 @@ import { AdminPage } from './components/admin/AdminPage';
 import { HostWorkshopModal } from './components/workshops/HostWorkshopModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { RouteGuard } from './routing/RouteGuard';
+import { AccountFeedback } from './components/layout/AccountFeedback';
+import { AppErrorBoundary } from './components/layout/AppErrorBoundary';
 
 export const AppContent: React.FC = () => {
-  const { currentPage, selectedWorkshopId, setCurrentPage } = useWorkify();
+  const { currentPage, selectedWorkshopId, setCurrentPage, authUser, logoutError } = useWorkify();
 
   const renderCurrentPage = () => {
     switch (currentPage) {
@@ -22,13 +24,13 @@ export const AppContent: React.FC = () => {
       case 'workshops':
         return <WorkshopsPage />;
       case 'workshop-detail':
-        return <WorkshopDetailPage key={selectedWorkshopId} />;
+        return <WorkshopDetailPage key={`${selectedWorkshopId}:${authUser?.id ?? 'public'}`} />;
       case 'dashboard':
-        return <RouteGuard><DashboardPage /></RouteGuard>;
+        return <RouteGuard><DashboardPage key={authUser?.id} /></RouteGuard>;
       case 'profile':
-        return <RouteGuard><ProfilePage /></RouteGuard>;
+        return <RouteGuard><ProfilePage key={authUser?.id} /></RouteGuard>;
       case 'admin':
-        return <RouteGuard admin><AdminPage /></RouteGuard>;
+        return <RouteGuard admin><AdminPage key={authUser?.id} /></RouteGuard>;
       default:
         return <section className="px-6 py-24 text-center">
           <h1 className="text-3xl font-bold mb-4">Page not found</h1>
@@ -40,7 +42,9 @@ export const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAFAFC] dark:bg-[#070C1F] text-[#070C1F] dark:text-[#F3F4F7] transition-colors duration-200">
-      <Navbar />
+      <Navbar key={authUser?.id ?? 'public'} />
+      <AccountFeedback />
+      {logoutError && <p role="alert" className="px-6 py-3 text-center text-sm text-red-600 dark:text-red-400">{logoutError}</p>}
       <main tabIndex={-1} className="flex-1 w-full">
         {renderCurrentPage()}
       </main>
@@ -53,9 +57,9 @@ export const AppContent: React.FC = () => {
 
 export function App() {
   return (
-    <WorkifyProvider>
+    <AppErrorBoundary><WorkifyProvider>
       <AppContent />
-    </WorkifyProvider>
+    </WorkifyProvider></AppErrorBoundary>
   );
 }
 

@@ -1,4 +1,6 @@
-export type WorkshopStatus = 'open' | 'coming_soon' | 'cancelled' | 'archived';
+// Durable publication state. Scheduled/ongoing/completed are derived from time.
+export type WorkshopPublicationStatus = 'open' | 'coming_soon' | 'cancelled' | 'archived';
+export type WorkshopStatus = WorkshopPublicationStatus;
 
 export interface Workshop {
   id: string;

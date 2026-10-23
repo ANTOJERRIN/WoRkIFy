@@ -1,19 +1,23 @@
 import React from 'react';
 import type { Workshop } from '../../types';
 import { useWorkify } from '../../context/WorkifyContext';
-import { formatWorkshopDateIST } from '../../api/workshops';
+import { formatWorkshopSchedule, workshopLifecycle } from '../../domain/workshopLifecycle';
 import { Calendar, Video, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 interface WorkshopCardProps {
   workshop: Workshop;
+  now: number;
 }
 
-export const WorkshopCard: React.FC<WorkshopCardProps> = ({ workshop }) => {
-  const { openWorkshopDetail, registeredWorkshopIds, registerForWorkshop, registeringWorkshopId } = useWorkify();
+export const WorkshopCard: React.FC<WorkshopCardProps> = ({ workshop, now }) => {
+  const { openWorkshopDetail, registeredWorkshopIds, registerForWorkshop, registeringWorkshopId,
+    isLoggedIn, registrationsLoading, registrationsError } = useWorkify();
+  const registrationUnknown = isLoggedIn && (registrationsLoading || !!registrationsError);
   const isRegistered = registeredWorkshopIds.includes(workshop.id);
-  const isComingSoon = workshop.status === 'coming_soon';
+  const lifecycle = workshopLifecycle(workshop, now);
+  const isComingSoon = lifecycle.phase === 'unscheduled' || lifecycle.phase === 'coming-soon';
   const isRegistering = registeringWorkshopId === workshop.id;
-  const dateFormatted = formatWorkshopDateIST(workshop.startsAt, workshop.endsAt);
+  const dateFormatted = formatWorkshopSchedule(workshop);
 
   return (
     <div
@@ -75,20 +79,24 @@ export const WorkshopCard: React.FC<WorkshopCardProps> = ({ workshop }) => {
         <div className="flex items-center gap-2">
           {isComingSoon ? (
             <span className="px-3 py-1 rounded-lg bg-[#F3F4F7] dark:bg-white/10 text-[#636875] dark:text-gray-400 text-xs font-semibold cursor-not-allowed">
-              Coming soon
+              {lifecycle.label}
             </span>
+          ) : registrationUnknown ? (
+            <span className="text-xs text-[#636875] dark:text-gray-400">{registrationsError ? 'Registration status unavailable' : 'Checking registration...'}</span>
           ) : isRegistered ? (
             <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-lg">
               <CheckCircle2 className="w-3 h-3" />
               <span>Registered ✓</span>
             </span>
+          ) : !lifecycle.registrationEligible ? (
+            <span className="text-xs text-[#636875] dark:text-gray-400">{lifecycle.label} · Registration closed</span>
           ) : (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 registerForWorkshop(workshop.id);
               }}
-              disabled={isRegistering}
+              disabled={!!registeringWorkshopId}
               className="px-3 py-1 rounded-lg bg-[#2F6BFF] hover:bg-[#1F54E0] disabled:opacity-50 text-white text-xs font-semibold shadow-sm transition-colors"
             >
               {isRegistering ? 'Registering...' : 'Register'}

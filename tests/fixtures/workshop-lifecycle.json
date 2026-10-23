@@ -1,0 +1,30 @@
+{
+  "startsAt": "2030-01-02T12:00:00Z",
+  "endsAt": "2030-01-02T13:00:00Z",
+  "cases": [
+    { "name": "before join window", "status": "open", "now": "2030-01-02T11:44:59.999Z", "phase": "scheduled", "register": true, "join": false, "discover": true },
+    { "name": "exact join opening", "status": "open", "now": "2030-01-02T11:45:00Z", "phase": "scheduled", "register": true, "join": true, "discover": true },
+    { "name": "exact start", "status": "open", "now": "2030-01-02T12:00:00Z", "phase": "ongoing", "register": false, "join": true, "discover": true },
+    { "name": "last millisecond", "status": "open", "now": "2030-01-02T12:59:59.999Z", "phase": "ongoing", "register": false, "join": true, "discover": true },
+    { "name": "exact end", "status": "open", "now": "2030-01-02T13:00:00Z", "phase": "completed", "register": false, "join": false, "discover": false },
+    { "name": "after end", "status": "open", "now": "2030-01-02T14:00:00Z", "phase": "completed", "register": false, "join": false, "discover": false },
+    { "name": "unscheduled coming soon", "status": "coming_soon", "startsAt": null, "endsAt": null, "now": "2030-01-02T11:00:00Z", "phase": "unscheduled", "register": false, "join": false, "discover": true },
+    { "name": "unscheduled open fails closed", "status": "open", "startsAt": null, "endsAt": null, "now": "2030-01-02T11:00:00Z", "phase": "unavailable", "register": false, "join": false, "discover": false },
+    { "name": "missing end", "status": "open", "endsAt": null, "now": "2030-01-02T12:30:00Z", "phase": "unavailable", "register": false, "join": false, "discover": false },
+    { "name": "missing start", "status": "open", "startsAt": null, "now": "2030-01-02T12:30:00Z", "phase": "unavailable", "register": false, "join": false, "discover": false },
+    { "name": "reversed dates", "status": "open", "endsAt": "2030-01-02T11:00:00Z", "now": "2030-01-02T11:00:00Z", "phase": "unavailable", "register": false, "join": false, "discover": false },
+    { "name": "zero duration", "status": "open", "endsAt": "2030-01-02T12:00:00Z", "now": "2030-01-02T11:00:00Z", "phase": "unavailable", "register": false, "join": false, "discover": false },
+    { "name": "cancelled during window", "status": "cancelled", "now": "2030-01-02T12:30:00Z", "phase": "cancelled", "register": false, "join": false, "discover": false },
+    { "name": "archived before start", "status": "archived", "now": "2030-01-02T11:00:00Z", "phase": "archived", "register": false, "join": false, "discover": false },
+    { "name": "scheduled coming soon", "status": "coming_soon", "now": "2030-01-02T11:00:00Z", "phase": "coming-soon", "register": false, "join": false, "discover": true },
+    { "name": "coming soon during window", "status": "coming_soon", "now": "2030-01-02T12:30:00Z", "phase": "coming-soon", "register": false, "join": false, "discover": true },
+    { "name": "past coming soon", "status": "coming_soon", "now": "2030-01-02T13:00:00Z", "phase": "completed", "register": false, "join": false, "discover": false },
+    { "name": "unknown publication", "status": "unexpected", "now": "2030-01-02T12:30:00Z", "phase": "unavailable", "register": false, "join": false, "discover": false },
+    { "name": "infinite schedule", "status": "open", "startsAt": "-infinity", "endsAt": "infinity", "now": "2030-01-02T12:30:00Z", "phase": "unavailable", "register": false, "join": false, "discover": false },
+    { "name": "invalid clock", "status": "open", "now": "infinity", "phase": "unavailable", "register": false, "join": false, "discover": false },
+    { "name": "cancelled invalid schedule", "status": "cancelled", "startsAt": null, "endsAt": null, "now": "2030-01-02T12:30:00Z", "phase": "cancelled", "register": false, "join": false, "discover": false },
+    { "name": "invalid text date", "status": "open", "startsAt": "invalid", "now": "2030-01-02T12:30:00Z", "phase": "unavailable", "register": false, "join": false, "discover": false, "skipSql": true },
+    { "name": "timezone-less instant", "status": "open", "startsAt": "2030-01-02T12:00:00", "now": "2030-01-02T12:30:00Z", "phase": "unavailable", "register": false, "join": false, "discover": false, "skipSql": true },
+    { "name": "impossible calendar date", "status": "open", "startsAt": "2030-02-30T12:00:00Z", "now": "2030-01-02T12:30:00Z", "phase": "unavailable", "register": false, "join": false, "discover": false, "skipSql": true }
+  ]
+}

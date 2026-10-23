@@ -1,0 +1,1522 @@
+{
+  "project_ref": "epgsgvwdlwarktbjrdfn",
+  "inspected_on": "2026-10-23",
+  "note": "Schema metadata only; no account rows, private meeting URLs, credentials or production fixture data.",
+  "schema": {
+    "storage_rls": {
+        "rls": true,
+        "force_rls": false
+    },
+    "client_roles": [
+        {
+            "name": "anon",
+            "inherit": true,
+            "superuser": false,
+            "bypass_rls": false
+        },
+        {
+            "name": "authenticated",
+            "inherit": true,
+            "superuser": false,
+            "bypass_rls": false
+        },
+        {
+            "name": "service_role",
+            "inherit": true,
+            "superuser": false,
+            "bypass_rls": true
+        }
+    ],
+    "client_memberships": [],
+    "grants": [
+      {
+        "grantee": "authenticated",
+        "table_name": "admin_users",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "admin_users",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "admin_users",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "admin_users",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "admin_users",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "admin_users",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "admin_users",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "admin_users",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "admin_users",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "admin_users",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "admin_users",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "admin_users",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "admin_users",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "admin_users",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "linkedin_reviews",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "profiles",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "profiles",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "profiles",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "profiles",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "profiles",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "profiles",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "profiles",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "profiles",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "profiles",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "profiles",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "profiles",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "profiles",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "profiles",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "profiles",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "registrations",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "registrations",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "registrations",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "registrations",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "registrations",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "registrations",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "registrations",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "registrations",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "registrations",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "registrations",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "registrations",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "registrations",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "registrations",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "registrations",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshop_links",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshop_links",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshop_links",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshop_links",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshop_links",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshop_links",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshop_links",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshop_links",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshop_links",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshop_links",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshop_links",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshop_links",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshop_links",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshop_links",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshops",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshops",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshops",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshops",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshops",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshops",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "authenticated",
+        "table_name": "workshops",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshops",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshops",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshops",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshops",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshops",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshops",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "service_role",
+        "table_name": "workshops",
+        "privilege_type": "UPDATE"
+      }
+    ],
+    "tables": [
+      {
+        "rls": true,
+        "name": "admin_users",
+        "force_rls": false
+      },
+      {
+        "rls": true,
+        "name": "linkedin_reviews",
+        "force_rls": false
+      },
+      {
+        "rls": true,
+        "name": "profiles",
+        "force_rls": false
+      },
+      {
+        "rls": true,
+        "name": "registrations",
+        "force_rls": false
+      },
+      {
+        "rls": true,
+        "name": "workshop_links",
+        "force_rls": false
+      },
+      {
+        "rls": true,
+        "name": "workshops",
+        "force_rls": false
+      }
+    ],
+    "columns": [
+      {
+        "udt_name": "uuid",
+        "data_type": "uuid",
+        "table_name": "admin_users",
+        "column_name": "user_id",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "table_name": "admin_users",
+        "column_name": "created_at",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 2
+      },
+      {
+        "udt_name": "uuid",
+        "data_type": "uuid",
+        "table_name": "linkedin_reviews",
+        "column_name": "id",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "ordinal_position": 1
+      },
+      {
+        "udt_name": "uuid",
+        "data_type": "uuid",
+        "table_name": "linkedin_reviews",
+        "column_name": "user_id",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "udt_name": "uuid",
+        "data_type": "uuid",
+        "table_name": "linkedin_reviews",
+        "column_name": "workshop_id",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "linkedin_reviews",
+        "column_name": "linkedin_url",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 4
+      },
+      {
+        "udt_name": "int4",
+        "data_type": "integer",
+        "table_name": "linkedin_reviews",
+        "column_name": "overall_score",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 5
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "linkedin_reviews",
+        "column_name": "band",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 6
+      },
+      {
+        "udt_name": "jsonb",
+        "data_type": "jsonb",
+        "table_name": "linkedin_reviews",
+        "column_name": "criteria",
+        "is_nullable": "NO",
+        "column_default": "'{}'::jsonb",
+        "ordinal_position": 7
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "linkedin_reviews",
+        "column_name": "strengths",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 8
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "linkedin_reviews",
+        "column_name": "improvements",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 9
+      },
+      {
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "table_name": "linkedin_reviews",
+        "column_name": "created_at",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 10
+      },
+      {
+        "udt_name": "uuid",
+        "data_type": "uuid",
+        "table_name": "profiles",
+        "column_name": "id",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "profiles",
+        "column_name": "name",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "profiles",
+        "column_name": "email",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "profiles",
+        "column_name": "handle",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 4
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "profiles",
+        "column_name": "bio",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 5
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "profiles",
+        "column_name": "avatar_url",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 6
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "profiles",
+        "column_name": "college",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 7
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "profiles",
+        "column_name": "location",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 8
+      },
+      {
+        "udt_name": "_text",
+        "data_type": "ARRAY",
+        "table_name": "profiles",
+        "column_name": "skills",
+        "is_nullable": "NO",
+        "column_default": "'{}'::text[]",
+        "ordinal_position": 9
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "profiles",
+        "column_name": "linkedin_url",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 10
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "profiles",
+        "column_name": "x_url",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 11
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "profiles",
+        "column_name": "website_url",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 12
+      },
+      {
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "table_name": "profiles",
+        "column_name": "created_at",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 13
+      },
+      {
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "table_name": "profiles",
+        "column_name": "updated_at",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 14
+      },
+      {
+        "udt_name": "uuid",
+        "data_type": "uuid",
+        "table_name": "registrations",
+        "column_name": "id",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "ordinal_position": 1
+      },
+      {
+        "udt_name": "uuid",
+        "data_type": "uuid",
+        "table_name": "registrations",
+        "column_name": "user_id",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "udt_name": "uuid",
+        "data_type": "uuid",
+        "table_name": "registrations",
+        "column_name": "workshop_id",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "table_name": "registrations",
+        "column_name": "created_at",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 4
+      },
+      {
+        "udt_name": "uuid",
+        "data_type": "uuid",
+        "table_name": "workshop_links",
+        "column_name": "workshop_id",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 1
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "workshop_links",
+        "column_name": "meet_url",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "table_name": "workshop_links",
+        "column_name": "created_at",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 3
+      },
+      {
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "table_name": "workshop_links",
+        "column_name": "updated_at",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 4
+      },
+      {
+        "udt_name": "uuid",
+        "data_type": "uuid",
+        "table_name": "workshops",
+        "column_name": "id",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "ordinal_position": 1
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "workshops",
+        "column_name": "slug",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 2
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "workshops",
+        "column_name": "title",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 3
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "workshops",
+        "column_name": "host_name",
+        "is_nullable": "NO",
+        "column_default": null,
+        "ordinal_position": 4
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "workshops",
+        "column_name": "mode",
+        "is_nullable": "NO",
+        "column_default": "'Online — Google Meet'::text",
+        "ordinal_position": 5
+      },
+      {
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "table_name": "workshops",
+        "column_name": "starts_at",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 6
+      },
+      {
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "table_name": "workshops",
+        "column_name": "ends_at",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 7
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "workshops",
+        "column_name": "timezone",
+        "is_nullable": "NO",
+        "column_default": "'Asia/Kolkata'::text",
+        "ordinal_position": 8
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "workshops",
+        "column_name": "status",
+        "is_nullable": "NO",
+        "column_default": "'open'::text",
+        "ordinal_position": 9
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "workshops",
+        "column_name": "short_description",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 10
+      },
+      {
+        "udt_name": "text",
+        "data_type": "text",
+        "table_name": "workshops",
+        "column_name": "full_description",
+        "is_nullable": "YES",
+        "column_default": null,
+        "ordinal_position": 11
+      },
+      {
+        "udt_name": "_text",
+        "data_type": "ARRAY",
+        "table_name": "workshops",
+        "column_name": "tags",
+        "is_nullable": "NO",
+        "column_default": "'{}'::text[]",
+        "ordinal_position": 12
+      },
+      {
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "table_name": "workshops",
+        "column_name": "created_at",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 13
+      },
+      {
+        "udt_name": "timestamptz",
+        "data_type": "timestamp with time zone",
+        "table_name": "workshops",
+        "column_name": "updated_at",
+        "is_nullable": "NO",
+        "column_default": "now()",
+        "ordinal_position": 14
+      }
+    ],
+    "indexes": [
+      {
+        "indexdef": "CREATE UNIQUE INDEX admin_users_pkey ON public.admin_users USING btree (user_id)",
+        "indexname": "admin_users_pkey",
+        "tablename": "admin_users"
+      },
+      {
+        "indexdef": "CREATE INDEX idx_linkedin_reviews_user_workshop ON public.linkedin_reviews USING btree (user_id, workshop_id)",
+        "indexname": "idx_linkedin_reviews_user_workshop",
+        "tablename": "linkedin_reviews"
+      },
+      {
+        "indexdef": "CREATE INDEX idx_linkedin_reviews_workshop_id ON public.linkedin_reviews USING btree (workshop_id)",
+        "indexname": "idx_linkedin_reviews_workshop_id",
+        "tablename": "linkedin_reviews"
+      },
+      {
+        "indexdef": "CREATE UNIQUE INDEX linkedin_reviews_pkey ON public.linkedin_reviews USING btree (id)",
+        "indexname": "linkedin_reviews_pkey",
+        "tablename": "linkedin_reviews"
+      },
+      {
+        "indexdef": "CREATE UNIQUE INDEX linkedin_reviews_user_id_workshop_id_key ON public.linkedin_reviews USING btree (user_id, workshop_id)",
+        "indexname": "linkedin_reviews_user_id_workshop_id_key",
+        "tablename": "linkedin_reviews"
+      },
+      {
+        "indexdef": "CREATE UNIQUE INDEX profiles_handle_key ON public.profiles USING btree (handle)",
+        "indexname": "profiles_handle_key",
+        "tablename": "profiles"
+      },
+      {
+        "indexdef": "CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)",
+        "indexname": "profiles_pkey",
+        "tablename": "profiles"
+      },
+      {
+        "indexdef": "CREATE INDEX idx_registrations_user_id ON public.registrations USING btree (user_id)",
+        "indexname": "idx_registrations_user_id",
+        "tablename": "registrations"
+      },
+      {
+        "indexdef": "CREATE INDEX idx_registrations_workshop_id ON public.registrations USING btree (workshop_id)",
+        "indexname": "idx_registrations_workshop_id",
+        "tablename": "registrations"
+      },
+      {
+        "indexdef": "CREATE UNIQUE INDEX registrations_pkey ON public.registrations USING btree (id)",
+        "indexname": "registrations_pkey",
+        "tablename": "registrations"
+      },
+      {
+        "indexdef": "CREATE UNIQUE INDEX registrations_user_id_workshop_id_key ON public.registrations USING btree (user_id, workshop_id)",
+        "indexname": "registrations_user_id_workshop_id_key",
+        "tablename": "registrations"
+      },
+      {
+        "indexdef": "CREATE INDEX idx_workshop_links_workshop_id ON public.workshop_links USING btree (workshop_id)",
+        "indexname": "idx_workshop_links_workshop_id",
+        "tablename": "workshop_links"
+      },
+      {
+        "indexdef": "CREATE UNIQUE INDEX workshop_links_pkey ON public.workshop_links USING btree (workshop_id)",
+        "indexname": "workshop_links_pkey",
+        "tablename": "workshop_links"
+      },
+      {
+        "indexdef": "CREATE INDEX idx_workshops_status_starts_at ON public.workshops USING btree (status, starts_at)",
+        "indexname": "idx_workshops_status_starts_at",
+        "tablename": "workshops"
+      },
+      {
+        "indexdef": "CREATE UNIQUE INDEX workshops_pkey ON public.workshops USING btree (id)",
+        "indexname": "workshops_pkey",
+        "tablename": "workshops"
+      },
+      {
+        "indexdef": "CREATE UNIQUE INDEX workshops_slug_key ON public.workshops USING btree (slug)",
+        "indexname": "workshops_slug_key",
+        "tablename": "workshops"
+      }
+    ],
+    "policies": [
+      {
+        "cmd": "SELECT",
+        "qual": "( SELECT private.is_admin() AS is_admin)",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "admin_users",
+        "permissive": "PERMISSIVE",
+        "policyname": "admin_users_select_admin",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "DELETE",
+        "qual": "( SELECT private.is_admin() AS is_admin)",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "linkedin_reviews",
+        "permissive": "PERMISSIVE",
+        "policyname": "linkedin_reviews_admin_delete",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "((( SELECT auth.uid() AS uid) = user_id) OR ( SELECT private.is_admin() AS is_admin))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "linkedin_reviews",
+        "permissive": "PERMISSIVE",
+        "policyname": "linkedin_reviews_select_own",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "((( SELECT auth.uid() AS uid) = id) OR ( SELECT private.is_admin() AS is_admin))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "profiles",
+        "permissive": "PERMISSIVE",
+        "policyname": "profiles_select_own",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "UPDATE",
+        "qual": "(( SELECT auth.uid() AS uid) = id)",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "profiles",
+        "permissive": "PERMISSIVE",
+        "policyname": "profiles_update_own",
+        "schemaname": "public",
+        "with_check": "(( SELECT auth.uid() AS uid) = id)"
+      },
+      {
+        "cmd": "DELETE",
+        "qual": "(( SELECT auth.uid() AS uid) = user_id)",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "registrations",
+        "permissive": "PERMISSIVE",
+        "policyname": "registrations_delete_own",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "INSERT",
+        "qual": null,
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "registrations",
+        "permissive": "PERMISSIVE",
+        "policyname": "registrations_insert_own",
+        "schemaname": "public",
+        "with_check": "(( SELECT auth.uid() AS uid) = user_id)"
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "((( SELECT auth.uid() AS uid) = user_id) OR ( SELECT private.is_admin() AS is_admin))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "registrations",
+        "permissive": "PERMISSIVE",
+        "policyname": "registrations_select_own",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "DELETE",
+        "qual": "( SELECT private.is_admin() AS is_admin)",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "workshop_links",
+        "permissive": "PERMISSIVE",
+        "policyname": "workshop_links_admin_delete",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "INSERT",
+        "qual": null,
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "workshop_links",
+        "permissive": "PERMISSIVE",
+        "policyname": "workshop_links_admin_insert",
+        "schemaname": "public",
+        "with_check": "( SELECT private.is_admin() AS is_admin)"
+      },
+      {
+        "cmd": "UPDATE",
+        "qual": "( SELECT private.is_admin() AS is_admin)",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "workshop_links",
+        "permissive": "PERMISSIVE",
+        "policyname": "workshop_links_admin_update",
+        "schemaname": "public",
+        "with_check": "( SELECT private.is_admin() AS is_admin)"
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(( SELECT private.is_admin() AS is_admin) OR (EXISTS ( SELECT 1\n   FROM registrations r\n  WHERE ((r.workshop_id = workshop_links.workshop_id) AND (r.user_id = ( SELECT auth.uid() AS uid))))))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "workshop_links",
+        "permissive": "PERMISSIVE",
+        "policyname": "workshop_links_registered_select",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "DELETE",
+        "qual": "( SELECT private.is_admin() AS is_admin)",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "workshops",
+        "permissive": "PERMISSIVE",
+        "policyname": "workshops_admin_delete",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "INSERT",
+        "qual": null,
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "workshops",
+        "permissive": "PERMISSIVE",
+        "policyname": "workshops_admin_insert",
+        "schemaname": "public",
+        "with_check": "( SELECT private.is_admin() AS is_admin)"
+      },
+      {
+        "cmd": "UPDATE",
+        "qual": "( SELECT private.is_admin() AS is_admin)",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "workshops",
+        "permissive": "PERMISSIVE",
+        "policyname": "workshops_admin_update",
+        "schemaname": "public",
+        "with_check": "( SELECT private.is_admin() AS is_admin)"
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "true",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "workshops",
+        "permissive": "PERMISSIVE",
+        "policyname": "workshops_select_authenticated",
+        "schemaname": "public",
+        "with_check": null
+      },
+      {
+        "cmd": "DELETE",
+        "qual": "((bucket_id = 'avatars'::text) AND ((storage.foldername(name))[1] = ( SELECT (auth.uid())::text AS uid)))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "objects",
+        "permissive": "PERMISSIVE",
+        "policyname": "avatars_delete_own_folder",
+        "schemaname": "storage",
+        "with_check": null
+      },
+      {
+        "cmd": "INSERT",
+        "qual": null,
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "objects",
+        "permissive": "PERMISSIVE",
+        "policyname": "avatars_insert_own_folder",
+        "schemaname": "storage",
+        "with_check": "((bucket_id = 'avatars'::text) AND ((storage.foldername(name))[1] = ( SELECT (auth.uid())::text AS uid)))"
+      },
+      {
+        "cmd": "SELECT",
+        "qual": "(bucket_id = 'avatars'::text)",
+        "roles": [
+          "public"
+        ],
+        "tablename": "objects",
+        "permissive": "PERMISSIVE",
+        "policyname": "avatars_public_read",
+        "schemaname": "storage",
+        "with_check": null
+      },
+      {
+        "cmd": "UPDATE",
+        "qual": "((bucket_id = 'avatars'::text) AND ((storage.foldername(name))[1] = ( SELECT (auth.uid())::text AS uid)))",
+        "roles": [
+          "authenticated"
+        ],
+        "tablename": "objects",
+        "permissive": "PERMISSIVE",
+        "policyname": "avatars_update_own_folder",
+        "schemaname": "storage",
+        "with_check": "((bucket_id = 'avatars'::text) AND ((storage.foldername(name))[1] = ( SELECT (auth.uid())::text AS uid)))"
+      }
+    ],
+    "triggers": [
+      {
+        "name": "on_auth_user_created",
+        "definition": "CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION handle_new_user()",
+        "table_name": "auth.users"
+      },
+      {
+        "name": "profiles_set_updated_at",
+        "definition": "CREATE TRIGGER profiles_set_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION set_updated_at()",
+        "table_name": "profiles"
+      },
+      {
+        "name": "trg_validate_registration_workshop",
+        "definition": "CREATE TRIGGER trg_validate_registration_workshop BEFORE INSERT OR UPDATE ON public.registrations FOR EACH ROW EXECUTE FUNCTION validate_registration_workshop()",
+        "table_name": "registrations"
+      },
+      {
+        "name": "workshop_links_set_updated_at",
+        "definition": "CREATE TRIGGER workshop_links_set_updated_at BEFORE UPDATE ON public.workshop_links FOR EACH ROW EXECUTE FUNCTION set_updated_at()",
+        "table_name": "workshop_links"
+      },
+      {
+        "name": "workshops_set_updated_at",
+        "definition": "CREATE TRIGGER workshops_set_updated_at BEFORE UPDATE ON public.workshops FOR EACH ROW EXECUTE FUNCTION set_updated_at()",
+        "table_name": "workshops"
+      }
+    ],
+    "functions": [
+      {
+        "acl": "{postgres=X/postgres,authenticated=X/postgres}",
+        "args": "",
+        "name": "is_admin",
+        "schema": "private",
+        "definition": "CREATE OR REPLACE FUNCTION private.is_admin()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$ select exists (select 1 from public.admin_users where user_id = (select auth.uid())); $function$\n"
+      },
+      {
+        "acl": "{postgres=X/postgres,service_role=X/postgres}",
+        "args": "",
+        "name": "handle_new_user",
+        "schema": "public",
+        "definition": "CREATE OR REPLACE FUNCTION public.handle_new_user()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nbegin\n  insert into public.profiles (id, name, email, avatar_url)\n  values (\n    new.id,\n    coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name'),\n    new.email,\n    new.raw_user_meta_data->>'avatar_url'\n  )\n  on conflict (id) do update set\n    email = excluded.email,\n    name = coalesce(public.profiles.name, excluded.name),\n    avatar_url = coalesce(public.profiles.avatar_url, excluded.avatar_url),\n    updated_at = now();\n  return new;\nend;\n$function$\n"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "args": "",
+        "name": "set_updated_at",
+        "schema": "public",
+        "definition": "CREATE OR REPLACE FUNCTION public.set_updated_at()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public'\nAS $function$\nbegin\n  new.updated_at = now();\n  return new;\nend;\n$function$\n"
+      },
+      {
+        "acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "args": "",
+        "name": "validate_registration_workshop",
+        "schema": "public",
+        "definition": "CREATE OR REPLACE FUNCTION public.validate_registration_workshop()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public'\nAS $function$\nbegin\n  if exists (\n    select 1 from public.workshops\n    where id = new.workshop_id\n      and status = 'cancelled'\n  ) then\n    raise exception 'Cannot register for a cancelled workshop';\n  end if;\n  return new;\nend;\n$function$\n"
+      }
+    ],
+    "constraints": [
+      {
+        "name": "admin_users_pkey",
+        "type": "p",
+        "validated": true,
+        "definition": "PRIMARY KEY (user_id)",
+        "table_name": "admin_users"
+      },
+      {
+        "name": "admin_users_user_id_fkey",
+        "type": "f",
+        "validated": true,
+        "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE",
+        "table_name": "admin_users"
+      },
+      {
+        "name": "linkedin_reviews_band_check",
+        "type": "c",
+        "validated": true,
+        "definition": "CHECK ((band = ANY (ARRAY['Needs work'::text, 'Developing'::text, 'Strong'::text, 'Standout'::text])))",
+        "table_name": "linkedin_reviews"
+      },
+      {
+        "name": "linkedin_reviews_pkey",
+        "type": "p",
+        "validated": true,
+        "definition": "PRIMARY KEY (id)",
+        "table_name": "linkedin_reviews"
+      },
+      {
+        "name": "linkedin_reviews_score_check",
+        "type": "c",
+        "validated": true,
+        "definition": "CHECK (((overall_score >= 0) AND (overall_score <= 100)))",
+        "table_name": "linkedin_reviews"
+      },
+      {
+        "name": "linkedin_reviews_user_id_fkey",
+        "type": "f",
+        "validated": true,
+        "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE",
+        "table_name": "linkedin_reviews"
+      },
+      {
+        "name": "linkedin_reviews_user_id_workshop_id_key",
+        "type": "u",
+        "validated": true,
+        "definition": "UNIQUE (user_id, workshop_id)",
+        "table_name": "linkedin_reviews"
+      },
+      {
+        "name": "linkedin_reviews_workshop_id_fkey",
+        "type": "f",
+        "validated": true,
+        "definition": "FOREIGN KEY (workshop_id) REFERENCES workshops(id) ON DELETE CASCADE",
+        "table_name": "linkedin_reviews"
+      },
+      {
+        "name": "profiles_handle_format",
+        "type": "c",
+        "validated": true,
+        "definition": "CHECK (((handle IS NULL) OR (handle ~ '^[a-z0-9_]{3,20}$'::text)))",
+        "table_name": "profiles"
+      },
+      {
+        "name": "profiles_handle_key",
+        "type": "u",
+        "validated": true,
+        "definition": "UNIQUE (handle)",
+        "table_name": "profiles"
+      },
+      {
+        "name": "profiles_id_fkey",
+        "type": "f",
+        "validated": true,
+        "definition": "FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE",
+        "table_name": "profiles"
+      },
+      {
+        "name": "profiles_linkedin_url_format_check",
+        "type": "c",
+        "validated": true,
+        "definition": "CHECK (((linkedin_url IS NULL) OR (linkedin_url ~* '^https://(www\\.)?linkedin\\.com/'::text)))",
+        "table_name": "profiles"
+      },
+      {
+        "name": "profiles_pkey",
+        "type": "p",
+        "validated": true,
+        "definition": "PRIMARY KEY (id)",
+        "table_name": "profiles"
+      },
+      {
+        "name": "profiles_skills_count",
+        "type": "c",
+        "validated": true,
+        "definition": "CHECK ((COALESCE(array_length(skills, 1), 0) <= 10))",
+        "table_name": "profiles"
+      },
+      {
+        "name": "profiles_website_url_format_check",
+        "type": "c",
+        "validated": true,
+        "definition": "CHECK (((website_url IS NULL) OR (website_url ~* '^https://'::text)))",
+        "table_name": "profiles"
+      },
+      {
+        "name": "profiles_x_url_format_check",
+        "type": "c",
+        "validated": true,
+        "definition": "CHECK (((x_url IS NULL) OR (x_url ~* '^https://(www\\.)?(x|twitter)\\.com/'::text)))",
+        "table_name": "profiles"
+      },
+      {
+        "name": "registrations_pkey",
+        "type": "p",
+        "validated": true,
+        "definition": "PRIMARY KEY (id)",
+        "table_name": "registrations"
+      },
+      {
+        "name": "registrations_user_id_fkey",
+        "type": "f",
+        "validated": true,
+        "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE",
+        "table_name": "registrations"
+      },
+      {
+        "name": "registrations_user_id_workshop_id_key",
+        "type": "u",
+        "validated": true,
+        "definition": "UNIQUE (user_id, workshop_id)",
+        "table_name": "registrations"
+      },
+      {
+        "name": "registrations_workshop_id_fkey",
+        "type": "f",
+        "validated": true,
+        "definition": "FOREIGN KEY (workshop_id) REFERENCES workshops(id) ON DELETE CASCADE",
+        "table_name": "registrations"
+      },
+      {
+        "name": "workshop_links_meet_url_https_check",
+        "type": "c",
+        "validated": true,
+        "definition": "CHECK ((meet_url ~* '^https://'::text))",
+        "table_name": "workshop_links"
+      },
+      {
+        "name": "workshop_links_pkey",
+        "type": "p",
+        "validated": true,
+        "definition": "PRIMARY KEY (workshop_id)",
+        "table_name": "workshop_links"
+      },
+      {
+        "name": "workshop_links_workshop_id_fkey",
+        "type": "f",
+        "validated": true,
+        "definition": "FOREIGN KEY (workshop_id) REFERENCES workshops(id) ON DELETE CASCADE",
+        "table_name": "workshop_links"
+      },
+      {
+        "name": "workshops_dates_check",
+        "type": "c",
+        "validated": true,
+        "definition": "CHECK (((ends_at IS NULL) OR (starts_at IS NULL) OR (ends_at > starts_at)))",
+        "table_name": "workshops"
+      },
+      {
+        "name": "workshops_mode_check",
+        "type": "c",
+        "validated": true,
+        "definition": "CHECK ((mode = 'Online — Google Meet'::text))",
+        "table_name": "workshops"
+      },
+      {
+        "name": "workshops_pkey",
+        "type": "p",
+        "validated": true,
+        "definition": "PRIMARY KEY (id)",
+        "table_name": "workshops"
+      },
+      {
+        "name": "workshops_slug_key",
+        "type": "u",
+        "validated": true,
+        "definition": "UNIQUE (slug)",
+        "table_name": "workshops"
+      },
+      {
+        "name": "workshops_status_check",
+        "type": "c",
+        "validated": true,
+        "definition": "CHECK ((status = ANY (ARRAY['open'::text, 'coming_soon'::text, 'cancelled'::text])))",
+        "table_name": "workshops"
+      }
+    ],
+    "schema_grants": [
+      {
+        "acl": null,
+        "name": "private"
+      },
+      {
+        "acl": "{pg_database_owner=UC/pg_database_owner,=U/pg_database_owner,postgres=U/pg_database_owner,anon=U/pg_database_owner,authenticated=U/pg_database_owner,service_role=U/pg_database_owner}",
+        "name": "public"
+      }
+    ],
+    "column_acls": [],
+    "storage_bucket": {
+      "id": "avatars",
+      "name": "avatars",
+      "public": true,
+      "file_size_limit": 2097152,
+      "allowed_mime_types": [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/gif"
+      ]
+    }
+  }
+}

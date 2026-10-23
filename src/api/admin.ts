@@ -1,207 +1,120 @@
 import { supabase } from '../lib/supabase';
-import type { Workshop, WorkshopStatus, AdminRegistrationItem } from '../types';
-import { mapDbWorkshopToWorkshop, type DbWorkshop } from './workshops';
+import { requireUser, requestSignal } from './request';
+import type { Workshop, AdminRegistrationItem } from '../types';
+import { mapDbWorkshopToWorkshop, PUBLIC_WORKSHOP_FIELDS, type DbWorkshop } from './workshops';
+import { normalizeWorkshopInput, validateWorkshopInput, RETIRED_WORKSHOP_ID, type WorkshopInput } from '../domain/workshopInput';
+import { isAllowedMeetingUrl } from '../domain/meetingAccess';
+import { safeContactUrl } from '../domain/profileValidation';
+export type { WorkshopInput } from '../domain/workshopInput';
 
-/**
- * Checks if the current authenticated user has admin privileges.
- * Directly queries admin_users using RLS policy "Admins can read admin_users".
- */
-export async function checkIsAdmin(): Promise<boolean> {
-  const { data: { user } } = await supabase.auth.getUser();
+async function bounded<T>(operation: PromiseLike<T>, signal: AbortSignal): Promise<T> {
+  signal.throwIfAborted();
+  let abort!: () => void;
+  const cancelled = new Promise<never>((_resolve, reject) => {
+    abort = () => reject(new Error('The admin request could not be confirmed. Refresh before retrying.'));
+    signal.addEventListener('abort', abort, { once: true });
+  });
+  try { return await Promise.race([operation, cancelled]); }
+  finally { signal.removeEventListener('abort', abort); }
+}
+
+/** Authoritative membership source; editable metadata is never consulted. */
+export async function checkIsAdmin(expectedUserId?: string, signal?: AbortSignal): Promise<boolean> {
+  const pending = requestSignal(signal);
+  const { data: { user }, error: authError } = await bounded(supabase.auth.getUser(), pending);
+  if (authError) throw new Error('Your admin permission could not be verified.');
   if (!user) return false;
-
-  const { data, error } = await supabase
-    .from('admin_users')
-    .select('user_id')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  if (error || !data) {
-    return false;
-  }
-
-  return true;
+  if (expectedUserId && user.id !== expectedUserId) throw new Error('Your account changed. Reload to check permission.');
+  const { data, error } = await supabase.from('admin_users').select('user_id').eq('user_id', user.id).abortSignal(pending).maybeSingle();
+  if (error) throw new Error('Your admin permission could not be verified.');
+  return data?.user_id === user.id;
 }
-
-export interface WorkshopInput {
-  slug: string;
-  title: string;
-  hostName: string;
-  status: WorkshopStatus;
-  shortDescription: string;
-  fullDescription: string;
-  tags: string[];
-  startsAt: string | null;
-  endsAt: string | null;
-  timezone?: string;
+async function requireAdmin(expectedUserId: string | undefined, signal: AbortSignal) {
+  const user = await bounded(requireUser(expectedUserId), signal);
+  if (!await checkIsAdmin(user.id, signal)) throw new Error('Admin permission is required. Reload to check your access.');
+  signal.throwIfAborted();
 }
+const failure = (error: { code?: string } | null) => new Error(error?.code === '23505'
+  ? 'This slug is already in use. Choose another slug.'
+  : 'The admin update was not confirmed. Refresh to check the saved state before retrying.');
+const validId = (id: string) => {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) throw new Error('Invalid workshop ID. Refresh the admin list.');
+};
+const payload = (raw: WorkshopInput) => {
+  const error = validateWorkshopInput(raw);
+  if (error) throw new Error(error);
+  const input = normalizeWorkshopInput(raw);
+  return { slug: input.slug, title: input.title, host_name: input.hostName, status: input.status,
+    short_description: input.shortDescription, full_description: input.fullDescription, tags: input.tags,
+    starts_at: input.startsAt, ends_at: input.endsAt, timezone: input.timezone, mode: 'Online — Google Meet' };
+};
 
-/**
- * Create a new workshop (Admin only - enforced by RLS)
- */
-export async function createWorkshop(input: WorkshopInput): Promise<Workshop> {
-  const payload = {
-    slug: input.slug.trim().toLowerCase(),
-    title: input.title.trim(),
-    host_name: input.hostName.trim(),
-    mode: 'Online — Google Meet',
-    status: input.status,
-    short_description: input.shortDescription.trim(),
-    full_description: input.fullDescription.trim(),
-    tags: input.tags,
-    starts_at: input.startsAt,
-    ends_at: input.endsAt,
-    timezone: input.timezone || 'Asia/Kolkata',
-  };
-
-  const { data, error } = await supabase
-    .from('workshops')
-    .insert(payload)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
+export async function listAdminWorkshops(expectedUserId?: string, signal?: AbortSignal): Promise<Workshop[]> {
+  const pending = requestSignal(signal);
+  await requireAdmin(expectedUserId, pending);
+  const { data, error } = await supabase.from('workshops').select(PUBLIC_WORKSHOP_FIELDS).abortSignal(pending).order('created_at', { ascending: false });
+  if (error || !data) throw new Error('Admin workshops could not be loaded. Please retry.');
+  return data.map(row => mapDbWorkshopToWorkshop(row as DbWorkshop));
+}
+export async function createWorkshop(input: WorkshopInput, expectedUserId?: string, signal?: AbortSignal): Promise<Workshop> {
+  const value = payload(input), pending = requestSignal(signal);
+  await requireAdmin(expectedUserId, pending);
+  const { data, error } = await supabase.from('workshops').insert(value).select(PUBLIC_WORKSHOP_FIELDS).abortSignal(pending).single();
+  if (error || !data?.id || data.slug !== value.slug) throw failure(error);
   return mapDbWorkshopToWorkshop(data as DbWorkshop);
 }
-
-/**
- * Update an existing workshop (Admin only - enforced by RLS)
- */
-export async function updateWorkshop(id: string, input: Partial<WorkshopInput>): Promise<Workshop> {
-  const payload: Record<string, unknown> = {};
-  if (input.slug !== undefined) payload.slug = input.slug.trim().toLowerCase();
-  if (input.title !== undefined) payload.title = input.title.trim();
-  if (input.hostName !== undefined) payload.host_name = input.hostName.trim();
-  if (input.status !== undefined) payload.status = input.status;
-  if (input.shortDescription !== undefined) payload.short_description = input.shortDescription.trim();
-  if (input.fullDescription !== undefined) payload.full_description = input.fullDescription.trim();
-  if (input.tags !== undefined) payload.tags = input.tags;
-  if (input.startsAt !== undefined) payload.starts_at = input.startsAt;
-  if (input.endsAt !== undefined) payload.ends_at = input.endsAt;
-  if (input.timezone !== undefined) payload.timezone = input.timezone;
-
-  const { data, error } = await supabase
-    .from('workshops')
-    .update(payload)
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
+export async function updateWorkshop(id: string, input: WorkshopInput, expectedUserId?: string, signal?: AbortSignal): Promise<Workshop> {
+  validId(id);
+  if (id === RETIRED_WORKSHOP_ID && input.status !== 'archived') throw new Error('The retired workshop must remain archived.');
+  const value = payload(input), pending = requestSignal(signal);
+  await requireAdmin(expectedUserId, pending);
+  const { data, error } = await supabase.from('workshops').update(value).eq('id', id).select(PUBLIC_WORKSHOP_FIELDS).abortSignal(pending).single();
+  if (error || !data || data.id !== id) throw failure(error);
   return mapDbWorkshopToWorkshop(data as DbWorkshop);
 }
-
-/**
- * Cancel a workshop by updating status to 'cancelled' (Admin only)
- */
-export async function cancelWorkshop(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('workshops')
-    .update({ status: 'cancelled' })
-    .eq('id', id);
-
-  if (error) {
-    throw new Error(error.message);
-  }
+export async function setWorkshopStatus(id: string, status: 'cancelled' | 'archived', expectedUserId?: string, signal?: AbortSignal): Promise<Workshop> {
+  validId(id);
+  if (!['cancelled', 'archived'].includes(status)) throw new Error('Invalid workshop status.');
+  if (id === RETIRED_WORKSHOP_ID && status !== 'archived') throw new Error('The retired workshop must remain archived.');
+  const pending = requestSignal(signal);
+  await requireAdmin(expectedUserId, pending);
+  const { data, error } = await supabase.from('workshops').update({ status }).eq('id', id).select(PUBLIC_WORKSHOP_FIELDS).abortSignal(pending).single();
+  if (error || !data || data.id !== id || data.status !== status) throw failure(error);
+  return mapDbWorkshopToWorkshop(data as DbWorkshop);
 }
-
-/**
- * Fetch workshop meet link for admin view
- */
-export async function getAdminMeetUrl(workshopId: string): Promise<string> {
-  const { data, error } = await supabase
-    .from('workshop_links')
-    .select('meet_url')
-    .eq('workshop_id', workshopId)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data?.meet_url || '';
+export async function getAdminMeetUrl(workshopId: string, expectedUserId?: string, signal?: AbortSignal): Promise<string> {
+  validId(workshopId);
+  const pending = requestSignal(signal);
+  await requireAdmin(expectedUserId, pending);
+  const { data, error } = await supabase.from('workshop_links').select('meet_url').eq('workshop_id', workshopId).abortSignal(pending).maybeSingle();
+  if (error) throw new Error('The private meeting link could not be loaded.');
+  return isAllowedMeetingUrl(data?.meet_url) ? data.meet_url : '';
 }
-
-/**
- * Set or replace a workshop's Google Meet URL (Admin only - writes to workshop_links)
- */
-export async function setWorkshopMeetUrl(workshopId: string, meetUrl: string): Promise<void> {
-  const { error } = await supabase
-    .from('workshop_links')
-    .upsert({
-      workshop_id: workshopId,
-      meet_url: meetUrl.trim(),
-    });
-
-  if (error) {
-    throw new Error(error.message);
-  }
+export async function setWorkshopMeetUrl(workshopId: string, meetUrl: string, expectedUserId?: string, signal?: AbortSignal): Promise<void> {
+  validId(workshopId);
+  const value = meetUrl.trim();
+  if (value && !isAllowedMeetingUrl(value)) throw new Error('Use https://meet.google.com/abc-defg-hij without query parameters or fragments.');
+  const pending = requestSignal(signal);
+  await requireAdmin(expectedUserId, pending);
+  const { data, error } = await supabase.from('workshop_links').upsert({ workshop_id: workshopId, meet_url: value })
+    .select('workshop_id,meet_url').abortSignal(pending).single();
+  if (error || !data || data.workshop_id !== workshopId || data.meet_url !== value) throw failure(error);
 }
-
-interface RawRegistrationWithProfile {
-  id: string;
-  user_id: string;
-  workshop_id: string;
-  created_at: string;
-  profiles?: {
-    name: string;
-    email: string;
-    handle: string | null;
-    linkedin_url: string | null;
-  } | null;
-}
-
-/**
- * View registrations for a given workshop (Admin only)
- */
-export async function listWorkshopRegistrations(workshopId: string): Promise<AdminRegistrationItem[]> {
-  const { data, error } = await supabase
-    .from('registrations')
-    .select(`
-      id,
-      user_id,
-      workshop_id,
-      created_at
-    `)
-    .eq('workshop_id', workshopId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  if (!data || data.length === 0) return [];
-
-  // Fetch associated profiles for these users
-  const userIds = data.map((r: { user_id: string }) => r.user_id);
-  const { data: profilesData } = await supabase
-    .from('profiles')
-    .select('id, name, email, handle, linkedin_url')
-    .in('id', userIds);
-
-  const profileMap = new Map<string, { name: string; email: string; handle: string; linkedinUrl: string }>();
-  if (profilesData) {
-    for (const p of profilesData) {
-      profileMap.set(p.id, {
-        name: p.name || 'Anonymous User',
-        email: p.email || '',
-        handle: p.handle || '',
-        linkedinUrl: p.linkedin_url || '',
-      });
-    }
-  }
-
-  return (data as RawRegistrationWithProfile[]).map(r => ({
-    id: r.id,
-    userId: r.user_id,
-    workshopId: r.workshop_id,
-    createdAt: r.created_at,
-    profile: profileMap.get(r.user_id) || null,
-  }));
+export async function listWorkshopRegistrations(workshopId: string, expectedUserId?: string, signal?: AbortSignal): Promise<AdminRegistrationItem[]> {
+  validId(workshopId);
+  const pending = requestSignal(signal);
+  await requireAdmin(expectedUserId, pending);
+  const { data, error } = await supabase.from('registrations').select('id,user_id,workshop_id,created_at')
+    .eq('workshop_id', workshopId).abortSignal(pending).order('created_at', { ascending: false });
+  if (error || !data) throw new Error('Workshop registrations could not be loaded.');
+  if (!data.length) return [];
+  const { data: profiles, error: profileError } = await supabase.from('profiles').select('id,name,email,handle,linkedin_url')
+    .in('id', [...new Set(data.map(row => row.user_id))]).abortSignal(pending);
+  if (profileError || !profiles) throw new Error('Attendee contact details could not be loaded.');
+  const byId = new Map(profiles.map(row => [row.id, row]));
+  return data.map(row => {
+    const profile = byId.get(row.user_id);
+    return { id: row.id, userId: row.user_id, workshopId: row.workshop_id, createdAt: row.created_at,
+      profile: profile ? { name: profile.name || '', email: profile.email || '', handle: profile.handle || '', linkedinUrl: safeContactUrl(profile.linkedin_url) } : null };
+  });
 }

@@ -26,6 +26,8 @@ root lockfile. There is no separate frontend install or workspace package.
 | --- | --- |
 | `VITE_SUPABASE_URL` | Your Supabase project API URL |
 | `VITE_SUPABASE_ANON_KEY` | Public publishable key, or legacy anon key |
+| `VITE_HOST_CONTACT_NUMBER` | Optional public contact number; omission preserves the local host-dialog number; an empty/invalid value disables the tel link |
+| `VITE_F1FORGE_URL` | Optional approved HTTPS partner URL; empty/invalid values render plain F1 Forge text |
 
 The example contains placeholders only. Set real values in the ignored root
 `.env` file or the hosting build environment. Restart Vite after changing them.
@@ -48,6 +50,7 @@ validity or cloud permissions.
 | `npm.cmd run lint` | Lint source and tests |
 | `npm.cmd run test:config` | Configuration and build rejection checks |
 | `npm.cmd run test:db` | Disposable PostgreSQL migration/authorization checks |
+| `npm.cmd run test:domain` | Controlled-time workshop lifecycle and schedule checks |
 | `npm.cmd run test:browser` | Desktop/mobile browser regression checks |
 
 Install Chromium once with `npx.cmd playwright install chromium`. To use installed
@@ -113,6 +116,42 @@ has been confirmed, and no hosting settings have been changed.
 
 ## Current feature limits
 
+Prompt 14 completes the local integration review. **Production release is not
+ready:** the inspected backend has schema/history drift and lacks the pending
+access contracts; the actual host and real-account smoke checks are unverified.
+See the [readiness assessment and student walkthrough](docs/release-review.md),
+[architecture](docs/architecture.md), and [release/rollback plan](docs/release-plan.md).
+All source changes remain local and no live migration or deployment was performed.
+
+Release preparation now includes a [tested backend compatibility package](backend/release/README.md)
+for the inspected existing database, with schema drift guards and source hashes.
+The next external step is an identified staging clone, followed by real-account
+and hosting acceptance. The candidate has not been applied to the cloud.
+
+Prompt 13 adds an independent admin workshop list (including archived history),
+confirmed saves, status-only cancellation/archival, protected meeting management
+and validated contact destinations. Its migration remains unapplied. See
+[the admin and hosting review](docs/admin-hosting.md).
+
+Prompt 12 adds validated profile drafts and staged avatar uploads with confirmed
+owner-scoped saves. Its profile/storage migration remains unapplied. See
+[the profile editor review](docs/profile-editor.md) for failure handling and public
+avatar visibility. Stage 13 continues this work below the same local baseline.
+
+Prompt 11 groups personal registrations into ongoing, upcoming and past/closed
+sessions, with a separate invalid-schedule section, host/status information and
+keyboard-accessible detail navigation. See [the attendee dashboard review](docs/attendee-dashboard.md).
+Stage 12 follows this dashboard work in the one-stage-at-a-time sequence.
+
+Prompt 10 adds local server-enforced meeting access and a shared detail/dashboard
+control. Its migration is unapplied. See [meeting access](docs/meeting-link-access.md)
+for time boundaries, admin management exceptions and remaining release checks.
+
+Prompt 09 adds local registration/cancellation enforcement and shared refresh
+handling; its database migration is unapplied. See
+[the registration service report](docs/registration-service.md) for authorization,
+cancellation/history rules, tests and pending live verification.
+
 Public discovery/details are implemented; deployed anonymous access still needs
 the pending public-read migration and correct configuration. Existing valid
 sessions support protected registration/history/profile/admin/contact-hosting
@@ -122,6 +161,7 @@ login is unavailable.
 The LinkedIn review feature is retired from source. Its archival migration is
 unapplied in the inspected project; historical data remains. Meeting URLs stay
 private. URL routing is implemented in prompt 05; further session and
-lifecycle/access work belong to later prompts. See [routing and hosting requirements](docs/url-routing.md).
+lifecycle/access work are implemented locally. See [routing and hosting requirements](docs/url-routing.md)
+and the current [integration review](docs/release-review.md) for release limitations.
 Registration does not prove attendance, completion, certification or assessment
 success. No cloud migration or deployment is part of these local edits.

@@ -51,6 +51,12 @@ offers retry. Meeting URLs and private data are not part of this public query.
 
 ## Hosting requirements
 
+**23 October update:** the user identified Render origin
+`https://workify-x6pd.onrender.com`. Direct document URLs currently return 404.
+See [Render release preparation](render-release.md) for concrete evidence and
+scoped route rules; account settings and application of those rules are pending.
+The unidentified-host statement below describes the original prompt 05 review.
+
 No hosting provider configuration or deployed commit was identified in this
 checkout. Repository root remains the build root, and `dist/` the publish
 directory. No deployment configuration was applied remotely.
@@ -102,3 +108,11 @@ reconciling the prior report/tests or applying any migration.
 
 No schema changes, migration applications, cloud configuration changes or
 deployments were performed in prompt 05. Live refresh behavior is unverified.
+
+## Current review note — prompt 14
+
+The earlier archival identity mismatch described above was resolved in prompt 08
+using read-only evidence; the current combined database suite passes. The dated
+prompt 05 results remain historical. See [the final integration review](release-review.md)
+for current test evidence and confirmed cloud/hosting blockers, and
+[the release plan](release-plan.md) before applying SQL or publishing a frontend.

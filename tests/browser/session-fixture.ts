@@ -2,13 +2,13 @@ import type { Page } from '@playwright/test';
 
 const workshopId = 'be33c1fc-e4c4-4def-b33e-078fdf662400';
 const userId = '55555555-5555-4555-8555-555555555555';
-const archived = {
+export const archived = {
   id: workshopId, slug: 'linkedin-workshop', title: 'LinkedIn Workshop', host_name: 'F1 Forge',
   mode: 'Online — Google Meet', starts_at: '2026-10-02T14:00:00Z', ends_at: '2026-10-02T15:00:00Z',
   timezone: 'Asia/Kolkata', status: 'archived', short_description: 'Historical workshop fixture',
   full_description: 'Preserved historical metadata.', tags: ['LinkedIn'],
 };
-const profile = {
+export const profile = {
   id: userId, name: 'History fixture user', email: 'history@fixture.test', handle: 'history_fixture',
   bio: '', avatar_url: '/workify-logo.png', college: '', location: '', skills: [],
   linkedin_url: 'https://www.linkedin.com/in/history-fixture', x_url: '', website_url: '',
@@ -38,6 +38,8 @@ export async function setupSession(page: Page, signedIn = false, admin = false) 
     } else if (url.pathname === '/rest/v1/workshops') {
       if (url.searchParams.get('status') === 'neq.archived') await route.fulfill({ json: [] });
       else await route.fulfill({ json: [archived] });
+    } else if (url.pathname === '/rest/v1/rpc/get_workshop_join_state') {
+      await route.fulfill({ json: { status: 'unavailable' } });
     } else if (url.pathname === '/auth/v1/user') {
       await route.fulfill(signedIn ? { json: user } : { status: 401, json: { message: 'No session' } });
     } else if (url.pathname === '/rest/v1/admin_users') {

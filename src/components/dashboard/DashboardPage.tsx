@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import { useWorkify } from '../../context/WorkifyContext';
-import { formatWorkshopDateIST } from '../../api/workshops';
-import { listUserRegistrationsWithWorkshops } from '../../api/registrations';
-import { getWorkshopMeetUrl, getJoinState, type JoinState } from '../../api/links';
+import { formatWorkshopSchedule, parseWorkshopInstant, workshopLifecycle } from '../../domain/workshopLifecycle';
+import { useWorkshopClock } from '../../hooks/useWorkshopClock';
+import { MeetingAccessControl } from '../workshops/MeetingAccessControl';
 import type { RegistrationWithWorkshop } from '../../types';
 import {
   Calendar,
@@ -10,53 +10,29 @@ import {
   Sparkles,
   Loader2,
   AlertCircle,
-  Video,
-  ExternalLink
 } from 'lucide-react';
 
 interface DashboardWorkshopCardProps {
   registration: RegistrationWithWorkshop;
   onOpenDetail: (id: string) => void;
   onCancelRegistration: (id: string) => void;
+  mutationPending: boolean;
+  now: number;
 }
 
 const DashboardWorkshopCard: React.FC<DashboardWorkshopCardProps> = ({
   registration,
   onOpenDetail,
   onCancelRegistration,
+  mutationPending,
+  now,
 }) => {
   const w = registration.workshop;
-  const isArchived = w.status === 'archived';
-  const dateFormatted = formatWorkshopDateIST(w.startsAt, w.endsAt);
-  const [meetUrl, setMeetUrl] = useState<string | null>(null);
-  const [joinState, setJoinState] = useState<JoinState>({ status: 'no_link' });
-
-  // Fetch Meet URL for registered workshop
-  useEffect(() => {
-    if (isArchived) return;
-    let isMounted = true;
-    getWorkshopMeetUrl(w.id).then(url => {
-      if (isMounted) setMeetUrl(url);
-    });
-    return () => {
-      isMounted = false;
-    };
-  }, [w.id, isArchived]);
-
-  // Compute join state and refresh periodically
-  useEffect(() => {
-    const updateState = () => {
-      const state = getJoinState(w.startsAt, w.endsAt, meetUrl);
-      setJoinState(state);
-    };
-
-    updateState();
-    const interval = setInterval(updateState, 60 * 1000);
-    return () => clearInterval(interval);
-  }, [w.startsAt, w.endsAt, meetUrl]);
-
+  const lifecycle = workshopLifecycle(w, now);
+  const historical = ['completed', 'cancelled', 'archived'].includes(lifecycle.phase);
+  const dateFormatted = formatWorkshopSchedule(w);
   return (
-    <div className="rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 p-6 flex flex-col justify-between shadow-sm card-hover-elevation">
+    <article aria-label={w.title} className="rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 p-6 flex flex-col justify-between shadow-sm card-hover-elevation">
       <div>
         <div className="flex items-center justify-between mb-3">
           <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#8B4CFF]/10 text-[#8B4CFF]">
@@ -67,12 +43,14 @@ const DashboardWorkshopCard: React.FC<DashboardWorkshopCardProps> = ({
           </div>
         </div>
 
-        <h3
-          onClick={() => onOpenDetail(w.id)}
-          className="text-lg font-bold text-[#070C1F] dark:text-white hover:text-[#2F6BFF] cursor-pointer transition-colors mb-2 font-['Plus_Jakarta_Sans',sans-serif]"
-        >
-          {w.title}
+        <h3 className="text-lg font-bold text-[#070C1F] dark:text-white mb-2 font-['Plus_Jakarta_Sans',sans-serif]">
+          <button onClick={() => onOpenDetail(w.id)} className="text-left break-words hover:text-[#2F6BFF] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2F6BFF] transition-colors">
+            {w.title}
+          </button>
         </h3>
+
+        <p className="text-xs text-[#636875] dark:text-gray-400 mb-2 break-words">Hosted by {w.hostName || 'Host unavailable'}</p>
+        {!historical && <p className="text-xs font-semibold text-[#8B4CFF] mb-3">{lifecycle.label}</p>}
 
         <p className="text-xs text-[#636875] dark:text-gray-400 line-clamp-2 mb-4">
           {w.shortDescription}
@@ -85,49 +63,23 @@ const DashboardWorkshopCard: React.FC<DashboardWorkshopCardProps> = ({
       </div>
 
       <div className="pt-4 border-t border-[#DDE0E8]/60 dark:border-white/10 flex flex-col gap-3">
-        {isArchived ? (
-          <p className="text-xs text-[#636875] dark:text-gray-400">Archived workshop · Registration history</p>
+        {historical ? (
+          <div className="text-xs text-[#636875] dark:text-gray-400">
+            <p>{lifecycle.label} · Registration history</p>
+            <p className="mt-1">Does not confirm attendance or completion.</p>
+          </div>
         ) : (
         <div className="flex items-center justify-between">
-          {joinState.status === 'active' && (
-            <a
-              href={joinState.meetUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2F6BFF] hover:bg-[#1F54E0] text-white text-xs font-semibold shadow-sm transition-colors"
-            >
-              <Video className="w-3.5 h-3.5" />
-              <span>Join Meet</span>
-              <ExternalLink className="w-3 h-3 ml-0.5" />
-            </a>
-          )}
+          <MeetingAccessControl workshop={w} label="Join Meet" />
 
-          {joinState.status === 'upcoming' && (
-            <span className="text-xs text-[#636875] dark:text-gray-400">
-              Starts {formatWorkshopDateIST(w.startsAt, null)}
-            </span>
-          )}
-
-          {joinState.status === 'ended' && (
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[11px] text-[#636875] dark:text-gray-400">
-                Workshop ended
-              </span>
-            </div>
-          )}
-
-          {joinState.status === 'no_link' && (
-            <span className="text-xs text-[#636875] dark:text-gray-400">
-              Link will be shared soon
-            </span>
-          )}
-
-          <button
+          {lifecycle.cancellationEligible && <button
             onClick={() => onCancelRegistration(w.id)}
-            className="text-xs text-[#636875] hover:text-red-500 underline self-start"
+            disabled={mutationPending}
+            aria-label={`Cancel registration for ${w.title}`}
+            className="text-xs text-[#636875] hover:text-red-500 underline self-start disabled:opacity-50 disabled:cursor-wait"
           >
             Cancel
-          </button>
+          </button>}
         </div>
         )}
 
@@ -138,54 +90,26 @@ const DashboardWorkshopCard: React.FC<DashboardWorkshopCardProps> = ({
           View details →
         </button>
       </div>
-    </div>
+    </article>
   );
 };
 
 export const DashboardPage: React.FC = () => {
+  const now = useWorkshopClock();
   const {
     isLoggedIn,
-    authUser,
     unregisterFromWorkshop,
     openWorkshopDetail,
-    setIsAuthModalOpen,
     setCurrentPage,
-    registeredWorkshopIds
+    registrations,
+    registeredWorkshopIds,
+    unavailableRegistrationCount,
+    registrationsLoading: loading,
+    registrationsRefreshing,
+    registrationsError: error,
+    reloadRegistrations,
+    registeringWorkshopId,
   } = useWorkify();
-
-  const [registrations, setRegistrations] = useState<RegistrationWithWorkshop[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      setCurrentPage('landing');
-      setIsAuthModalOpen(true);
-    }
-  }, [isLoggedIn, setCurrentPage, setIsAuthModalOpen]);
-
-  const loadData = useCallback(async () => {
-    if (!authUser) {
-      setRegistrations([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const regs = await listUserRegistrationsWithWorkshops();
-      setRegistrations(regs);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to load registered workshops';
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  }, [authUser]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData, registeredWorkshopIds]);
 
   if (!isLoggedIn) {
     return null;
@@ -193,8 +117,24 @@ export const DashboardPage: React.FC = () => {
 
   const handleCancelRegistration = async (workshopId: string) => {
     await unregisterFromWorkshop(workshopId);
-    setRegistrations(prev => prev.filter(r => r.workshopId !== workshopId));
   };
+
+  const groups = [
+    { id: 'ongoing', title: 'Ongoing sessions', phases: ['ongoing'], rows: [] as RegistrationWithWorkshop[] },
+    { id: 'upcoming', title: 'Upcoming sessions', phases: ['scheduled', 'coming-soon', 'unscheduled'], rows: [] as RegistrationWithWorkshop[] },
+    { id: 'past', title: 'Past and closed sessions', phases: ['completed', 'cancelled', 'archived'], rows: [] as RegistrationWithWorkshop[] },
+    { id: 'unavailable', title: 'Sessions needing schedule updates', phases: ['unavailable'], rows: [] as RegistrationWithWorkshop[] },
+  ];
+  for (const registration of registrations) {
+    groups.find(group => group.phases.includes(workshopLifecycle(registration.workshop, now).phase))!.rows.push(registration);
+  }
+  for (const group of groups) group.rows.sort((a, b) => {
+    const left = parseWorkshopInstant(a.workshop.startsAt);
+    const right = parseWorkshopInstant(b.workshop.startsAt);
+    if (left === null && right !== null) return 1;
+    if (right === null && left !== null) return -1;
+    return ((left ?? 0) - (right ?? 0)) * (group.id === 'past' ? -1 : 1) || a.id.localeCompare(b.id);
+  });
 
   return (
     <div className="w-full py-10 md:py-16 bg-[#FAFAFC] dark:bg-[#070C1F] min-h-[calc(100vh-4rem)] transition-colors">
@@ -225,6 +165,9 @@ export const DashboardPage: React.FC = () => {
           </button>
         </div>
 
+        <button disabled={loading || registrationsRefreshing} onClick={() => reloadRegistrations()} className="mb-4 text-xs font-semibold text-[#2F6BFF] disabled:opacity-50">Refresh registrations</button>
+        {registrationsRefreshing && <p role="status" className="text-sm mb-4">Refreshing registrations...</p>}
+        {!error && !loading && unavailableRegistrationCount > 0 && <p role="status" className="text-sm mb-4">Some workshop details are unavailable. Your registrations are preserved.</p>}
         {/* Registered Workshops Section */}
         <div>
           <div className="flex items-center justify-between mb-6">
@@ -237,7 +180,7 @@ export const DashboardPage: React.FC = () => {
               </p>
             </div>
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              {registrations.length} registered
+              {loading || error ? '—' : registeredWorkshopIds.length} registered
             </span>
           </div>
 
@@ -260,7 +203,7 @@ export const DashboardPage: React.FC = () => {
                 {error}
               </p>
               <button
-                onClick={() => loadData()}
+                onClick={() => reloadRegistrations()}
                 className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-colors"
               >
                 Try again
@@ -271,15 +214,22 @@ export const DashboardPage: React.FC = () => {
           {/* Registration cards or Empty state */}
           {!loading && !error && (
             registrations.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {registrations.map(reg => (
+              <div className="space-y-8">
+                {groups.filter(group => group.rows.length > 0).map(group => <section key={group.id} aria-labelledby={`dashboard-${group.id}`}>
+                  <h2 id={`dashboard-${group.id}`} className="text-lg font-bold text-[#070C1F] dark:text-white mb-4">{group.title} ({group.rows.length})</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {group.rows.map(reg => (
                   <DashboardWorkshopCard
                     key={reg.id}
                     registration={reg}
                     onOpenDetail={openWorkshopDetail}
                     onCancelRegistration={handleCancelRegistration}
+                    mutationPending={!!registeringWorkshopId}
+                    now={now}
                   />
                 ))}
+                  </div>
+                </section>)}
               </div>
             ) : (
               <div className="w-full py-16 px-6 rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 flex flex-col items-center justify-center text-center">
@@ -287,10 +237,10 @@ export const DashboardPage: React.FC = () => {
                   <Calendar className="w-6 h-6" />
                 </div>
                 <h3 className="text-base font-bold text-[#070C1F] dark:text-white mb-1">
-                  You haven't registered for any workshops yet
+                  {unavailableRegistrationCount > 0 ? 'Workshop details unavailable' : "You haven't registered for any workshops yet"}
                 </h3>
                 <p className="text-xs text-[#636875] dark:text-gray-400 max-w-sm mb-6">
-                  Explore upcoming engineering builds and register for your next live session.
+                  {unavailableRegistrationCount > 0 ? 'Refresh registrations to try loading their details again.' : 'Explore upcoming engineering builds and register for your next live session.'}
                 </p>
                 <button
                   onClick={() => setCurrentPage('workshops')}

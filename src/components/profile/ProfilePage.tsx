@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useWorkify } from '../../context/WorkifyContext';
 import { ProfileEditForm } from './ProfileEditForm';
-import { listUserRegistrationsWithWorkshops } from '../../api/registrations';
-import { formatWorkshopDateIST } from '../../api/workshops';
-import type { RegistrationWithWorkshop, UserProfile } from '../../types';
+import { formatWorkshopSchedule, workshopLifecycle } from '../../domain/workshopLifecycle';
+import { useWorkshopClock } from '../../hooks/useWorkshopClock';
+import type { UserProfile } from '../../types';
 import {
   ExternalLink,
   Globe,
@@ -15,45 +15,34 @@ import {
 } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
-  const { userProfile, setUserProfile, reloadProfile, authUser, openWorkshopDetail } = useWorkify();
+  const { userProfile, acceptProfile, reloadProfile, profileLoading, profileRefreshing, profileError,
+    registrations, registrationsLoading: loadingRegistrations, registrationsRefreshing,
+    registeredWorkshopIds, unavailableRegistrationCount,
+    registrationsError, reloadRegistrations, openWorkshopDetail } = useWorkify();
   const [isEditing, setIsEditing] = useState(false);
-  const [registrations, setRegistrations] = useState<RegistrationWithWorkshop[]>([]);
-  const [loadingRegistrations, setLoadingRegistrations] = useState(true);
-
-  const displayHandle = userProfile.handle ? `@${userProfile.handle.replace(/^@/, '')}` : '';
-
-  const loadRegisteredWorkshops = useCallback(async () => {
-    if (!authUser) {
-      setRegistrations([]);
-      setLoadingRegistrations(false);
-      return;
-    }
-    setLoadingRegistrations(true);
-    try {
-      const data = await listUserRegistrationsWithWorkshops();
-      setRegistrations(data);
-    } catch (err) {
-      console.error('Failed to load registered workshops on profile:', err);
-    } finally {
-      setLoadingRegistrations(false);
-    }
-  }, [authUser]);
-
-  useEffect(() => {
-    loadRegisteredWorkshops();
-  }, [loadRegisteredWorkshops]);
+  const now = useWorkshopClock();
 
   const handleSavedProfile = (updated: UserProfile) => {
-    setUserProfile(updated);
+    acceptProfile(updated);
     setIsEditing(false);
     reloadProfile();
   };
+
+  if (profileLoading) return <p role="status" className="py-24 text-center">Loading your profile...</p>;
+  if (profileError || !userProfile) return <section className="max-w-xl mx-auto px-6 py-24 text-center">
+    <h1 className="text-2xl font-bold mb-4">{profileError ? 'Profile could not be loaded' : 'Profile record unavailable'}</h1>
+    <p role={profileError ? 'alert' : undefined} className="text-sm mb-6">{profileError ?? 'Your session is valid, but no profile record was found. Contact support if this continues.'}</p>
+    <button onClick={() => reloadProfile()} className="px-5 py-3 rounded-xl bg-[#2F6BFF] text-white text-sm font-semibold">Retry profile</button>
+  </section>;
+  const displayHandle = userProfile.handle ? `@${userProfile.handle.replace(/^@/, '')}` : '';
 
   return (
     <div className="w-full py-10 md:py-16 bg-[#FAFAFC] dark:bg-[#070C1F] min-h-[calc(100vh-4rem)] transition-colors">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Profile Header Hero Card */}
+        <button disabled={profileRefreshing || isEditing} onClick={() => reloadProfile()} className="mb-4 text-xs font-semibold text-[#2F6BFF] disabled:opacity-50">Refresh profile</button>
+        {profileRefreshing && <p role="status" className="text-sm mb-4">Refreshing profile...</p>}
         <div className="rounded-3xl bg-white dark:bg-[#0B1533] border border-[#DDE0E8] dark:border-white/10 p-8 sm:p-10 mb-8 shadow-sm relative overflow-hidden">
           {/* Subtle background glow */}
           <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-[#2F6BFF]/10 to-[#8B4CFF]/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -64,18 +53,12 @@ export const ProfilePage: React.FC = () => {
                 <h2 className="text-xl font-bold text-[#070C1F] dark:text-white font-['Plus_Jakarta_Sans',sans-serif]">
                   Edit Profile
                 </h2>
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="text-xs text-[#636875] hover:text-[#070C1F] dark:text-gray-400 dark:hover:text-white font-semibold"
-                >
-                  Cancel
-                </button>
               </div>
 
               <ProfileEditForm
                 userProfile={userProfile}
                 onSaved={handleSavedProfile}
-                onCancel={() => setIsEditing(false)}
+                onCancel={() => { setIsEditing(false); void reloadProfile(); }}
               />
             </div>
           ) : (
@@ -206,22 +189,32 @@ export const ProfilePage: React.FC = () => {
                   Registered Workshops
                 </h2>
                 <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                  {registrations.length}
+                  {loadingRegistrations || registrationsError ? '—' : registeredWorkshopIds.length}
                 </span>
               </div>
 
-              {loadingRegistrations ? (
+              <p className="text-xs text-[#636875] dark:text-gray-400 mb-3">Registration history does not confirm attendance or completion.</p>
+
+              <button disabled={registrationsRefreshing} onClick={() => reloadRegistrations()} className="mb-3 text-xs text-[#2F6BFF] disabled:opacity-50">Refresh registrations</button>
+              {registrationsRefreshing && <p role="status" className="text-xs mb-3">Refreshing registrations...</p>}
+              {!registrationsError && !loadingRegistrations && unavailableRegistrationCount > 0 && <p role="status" className="text-xs mb-3">Some workshop details are unavailable. Your registrations are preserved.</p>}
+              {registrationsError ? (
+                <div role="alert" className="text-sm text-red-600 dark:text-red-400">
+                  <p>Registrations could not be loaded. {registrationsError}</p>
+                  <button onClick={() => reloadRegistrations()} className="mt-2 underline">Retry registrations</button>
+                </div>
+              ) : loadingRegistrations ? (
                 <p className="text-xs text-[#636875] dark:text-gray-400">Loading registered sessions...</p>
               ) : registrations.length > 0 ? (
                 <div className="space-y-3">
                   {registrations.map(reg => {
                     const w = reg.workshop;
-                    const dateFormatted = formatWorkshopDateIST(w.startsAt, w.endsAt);
+                    const dateFormatted = formatWorkshopSchedule(w);
                     return (
-                      <div
+                      <button type="button"
                         key={reg.id}
                         onClick={() => openWorkshopDetail(w.id)}
-                        className="p-4 rounded-2xl bg-[#F3F4F7] dark:bg-white/5 hover:bg-[#DDE0E8]/40 dark:hover:bg-white/10 transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                        className="w-full text-left p-4 rounded-2xl bg-[#F3F4F7] dark:bg-white/5 hover:bg-[#DDE0E8]/40 dark:hover:bg-white/10 transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                       >
                         <div>
                           <h4 className="text-sm font-bold text-[#070C1F] dark:text-white">
@@ -230,19 +223,19 @@ export const ProfilePage: React.FC = () => {
                           <div className="flex items-center gap-2 text-xs text-[#636875] dark:text-gray-400 mt-1">
                             <Clock className="w-3 h-3 text-[#2F6BFF]" />
                             <span>{dateFormatted}</span>
-                            {w.status === 'archived' && <span>Archived</span>}
+                            <span>{workshopLifecycle(w, now).label} · Registration history</span>
                           </div>
                         </div>
                         <span className="text-xs font-semibold text-[#2F6BFF] self-start sm:self-auto">
                           View details →
                         </span>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
               ) : (
                 <p className="text-xs text-[#636875] dark:text-gray-400">
-                  Not registered for any workshops yet.
+                  {unavailableRegistrationCount > 0 ? 'Refresh registrations to try loading their details again.' : 'Not registered for any workshops yet.'}
                 </p>
               )}
             </div>

@@ -18,7 +18,7 @@ begin
   end if;
   if target.slug is distinct from 'linkedin-workshop'
      or target.title is distinct from 'LinkedIn Workshop'
-     or target.host_name is distinct from 'ForMa'
+     or target.host_name is distinct from 'F1 Forge'
      or target.starts_at is distinct from timestamptz '2026-10-02 14:00:00+00'
      or target.ends_at is distinct from timestamptz '2026-10-02 15:00:00+00' then
     raise exception 'LinkedIn workshop identity mismatch; review metadata before archiving.';

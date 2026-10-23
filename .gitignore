@@ -8,11 +8,14 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.review-stage05/
 dist
 dist-ssr
 test-results/
 playwright-report/
+playwright.*.local.ts
 backend/supabase/.temp/
+backend/release/supabase/.temp/
 *.local
 
 # Environment files (keep .env.example as template)

@@ -23,3 +23,13 @@ test('the canonical entry loads local logo assets', async ({ page, request }) =>
   expect(asset.ok()).toBe(true);
   expect(asset.headers()['content-type']).toContain('image/png');
 });
+
+test('a missing local logo uses a local fallback without a remote image request', async ({ page }) => {
+  const remoteImages: string[] = [];
+  page.on('request', request => { if (request.resourceType() === 'image' && !request.url().startsWith('http://127.0.0.1:4174/')) remoteImages.push(request.url()); });
+  await page.route('https://workify-browser-test.supabase.co/**', route => route.fulfill({ json: [] }));
+  await page.route('**/workify-logo.png', route => route.abort());
+  await page.goto('/');
+  await expect(page.getByRole('banner').getByText('W', { exact: true })).toBeVisible();
+  expect(remoteImages).toEqual([]);
+});

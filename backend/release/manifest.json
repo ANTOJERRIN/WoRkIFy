@@ -1,0 +1,51 @@
+{
+  "project_ref": "epgsgvwdlwarktbjrdfn",
+  "inspected_on": "2026-10-23",
+  "sql_sha256": "3982073786b2fa320972a2728d21e43748f323b8a714558610d9dcf43ab93725",
+  "inputs": [
+    {
+      "path": "backend/release/observed-schema.json",
+      "sha256": "cf1d12f31b08f1e4b2508f1d0925203b5644ba835a7cf79d5c509c54a3cda141"
+    },
+    {
+      "path": "backend/release/inspect-schema.sql",
+      "sha256": "5e68773337798c9941dc952d9c149cf4f5627c42ec2377f9be71c5b5c82668d1"
+    },
+    {
+      "path": "backend/release/compatibility-before.sql",
+      "sha256": "ea777d3673d303547fbb72e8691e4f43461efecf94ab454c7d812261adcb983a"
+    },
+    {
+      "path": "backend/supabase/migrations/20261013172822_public_workshop_browsing.sql",
+      "sha256": "3f01fb534121463ffe1fd5fa7420b0722987d0e80923c34410e28e60a588cd7b"
+    },
+    {
+      "path": "backend/supabase/migrations/20261020123021_archive_linkedin_workshop.sql",
+      "sha256": "356a352daf642c9e561adaa867a4c0993164a0957d807ca5fd2f001a49eaa9b4"
+    },
+    {
+      "path": "backend/supabase/migrations/20261021181340_workshop_lifecycle_contract.sql",
+      "sha256": "6384ab883f0f74ecdf553cfbbc912dbcf9942b0097e20da91d5e6f2e140c14af"
+    },
+    {
+      "path": "backend/supabase/migrations/20261022170525_registration_service.sql",
+      "sha256": "8f18690c9a3a405428cc97c3c4ac835db8c7baa4ea90568e7fc018714e124abd"
+    },
+    {
+      "path": "backend/supabase/migrations/20261022172429_meeting_link_access.sql",
+      "sha256": "e090999f4412f61ab05f99815ed2149693af410d69c28abb601fbba0ee491836"
+    },
+    {
+      "path": "backend/supabase/migrations/20261023070718_profile_editor_contract.sql",
+      "sha256": "fa41c765c8b7a09c245a19061517bfccc73a54c213391dabbca6170390ddf0a6"
+    },
+    {
+      "path": "backend/supabase/migrations/20261023081331_admin_workshop_contract.sql",
+      "sha256": "5c76fb64ccbffc7ccdae51eaafc9fc2167cabbec92cc24f36937f4c920046378"
+    },
+    {
+      "path": "backend/release/compatibility-after.sql",
+      "sha256": "a2a9608dd9af7568ac396f7bc1ba5f3bdc2df84eaf6de3ce19b1206e9b9aa617"
+    }
+  ]
+}

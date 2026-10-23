@@ -29,7 +29,7 @@ export const Footer: React.FC = () => {
           {/* Center: Built by F1 Forge */}
           <div className="flex items-center gap-2 text-xs text-[#636875] dark:text-gray-400">
             <span>Built by</span>
-            <a
+            {F1FORGE_URL ? <a
               href={F1FORGE_URL}
               target="_blank"
               rel="noreferrer"
@@ -37,7 +37,7 @@ export const Footer: React.FC = () => {
             >
               <span>F1 Forge</span>
               <ExternalLink className="w-3 h-3 text-[#2F6BFF]" />
-            </a>
+            </a> : <span className="font-semibold text-[#070C1F] dark:text-white">F1 Forge</span>}
             <span>· Led by Jerrin Anto</span>
           </div>
 

@@ -7,6 +7,7 @@ export const Navbar: React.FC = () => {
     isLoggedIn,
     isAdmin,
     logout,
+    logoutPending,
     currentPage,
     setCurrentPage,
     setIsHostModalOpen,
@@ -17,6 +18,7 @@ export const Navbar: React.FC = () => {
 
   const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/90 dark:bg-[#070C1F]/90 backdrop-blur-md border-b border-[#DDE0E8] dark:border-white/10 transition-colors duration-200">
@@ -29,15 +31,12 @@ export const Navbar: React.FC = () => {
             className="flex items-center gap-3 group focus:outline-none text-left"
           >
             <div className="w-9 h-9 rounded-xl overflow-hidden shadow-sm flex items-center justify-center bg-white border border-[#DDE0E8] dark:border-white/10 group-hover:scale-105 transition-transform duration-200">
-              <img
+              {logoFailed ? <span aria-hidden="true" className="font-bold text-[#2F6BFF]">W</span> : <img
                 src="/workify-logo.png"
                 alt="Workify Logo"
                 className="w-8 h-8 object-contain"
-                onError={(e) => {
-                  // Fallback if local file not found in build
-                  (e.target as HTMLImageElement).src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuAYL1QwCM_q9VNyj-U3MkMf4cxN173cfBXm1yyzk-YW_ku4mkjSq39Wn_hBaQAyKLbQmHtK1L9uX_DxFTwTiiDEI_moAOMlLbjoPZaulniQwCGX9AfYn51QejkzhoVxD7lg1-95nCdmxTaqZCWjNLBm1ZvxEO3RmEuV8zW_u02Y_rfMmr9pT9g9q28q5aHC3Q0lyIyHHD3umxlLt9cnkW6YM-cKcvi2aI0rhYmT2cBbOn-6UXC0eReMybcV31Eig9bPxcQ';
-                }}
-              />
+                onError={() => setLogoFailed(true)}
+              />}
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold tracking-tight text-[#070C1F] dark:text-white font-['Plus_Jakarta_Sans',sans-serif]">
@@ -144,8 +143,8 @@ export const Navbar: React.FC = () => {
                   className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-[#2F6BFF]/30 transition-all focus:outline-none"
                 >
                   <img
-                    src={userProfile.avatarUrl}
-                    alt={userProfile.name}
+                    src={userProfile?.avatarUrl ?? '/workify-logo.png'}
+                    alt={userProfile?.name ?? 'Account'}
                     className="w-8 h-8 rounded-full object-cover border border-[#DDE0E8] dark:border-white/20"
                   />
                   <ChevronDown className="w-3.5 h-3.5 text-[#636875] dark:text-gray-400 hidden sm:block" />
@@ -158,10 +157,10 @@ export const Navbar: React.FC = () => {
                   >
                     <div className="px-4 py-2 border-b border-[#DDE0E8] dark:border-white/10">
                       <div className="font-semibold text-[#070C1F] dark:text-white">
-                        <span>{userProfile.name}</span>
+                        <span>{userProfile?.name ?? 'Account'}</span>
                       </div>
                       <p className="text-xs text-[#636875] dark:text-gray-400 truncate">
-                        {userProfile.handle ? `@${userProfile.handle.replace(/^@/, '')}` : ''}
+                        {userProfile?.handle ? `@${userProfile.handle.replace(/^@/, '')}` : ''}
                       </p>
                     </div>
 
@@ -203,6 +202,7 @@ export const Navbar: React.FC = () => {
                     <div className="border-t border-[#DDE0E8] dark:border-white/10 my-1"></div>
 
                     <button
+                      disabled={logoutPending}
                       onClick={() => {
                         logout();
                         setIsAvatarMenuOpen(false);
@@ -282,6 +282,7 @@ export const Navbar: React.FC = () => {
                 </button>
               )}
               <button
+                disabled={logoutPending}
                 onClick={() => {
                   logout();
                   setIsMobileMenuOpen(false);

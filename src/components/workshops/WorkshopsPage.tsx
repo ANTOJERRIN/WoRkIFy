@@ -1,24 +1,17 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
+import { discoverWorkshops } from '../../domain/workshopLifecycle';
+import { useWorkshopClock } from '../../hooks/useWorkshopClock';
 import { useWorkify } from '../../context/WorkifyContext';
 import { WorkshopCard } from './WorkshopCard';
 import { WorkshopFilters } from './WorkshopFilters';
 import { Sparkles, CalendarX, Plus, Loader2, AlertCircle } from 'lucide-react';
 
 export const WorkshopsPage: React.FC = () => {
-  const { workshops, workshopsLoading, workshopsError, reloadWorkshops, setIsHostModalOpen } = useWorkify();
+  const { workshops, workshopsLoading, workshopsRefreshing, workshopsError, reloadWorkshops, setIsHostModalOpen } = useWorkify();
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 60000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  // Use the existing schedule/status fields until stage 08 centralizes lifecycle.
-  // Keep the full context catalog intact for historical detail and account views.
-  const upcomingWorkshops = useMemo(() => workshops.filter(workshop =>
-    workshop.status !== 'cancelled' && workshop.status !== 'archived' && (!workshop.endsAt || new Date(workshop.endsAt).getTime() > now)
-  ), [workshops, now]);
+  const now = useWorkshopClock();
+  // Keep safe historical metadata in the catalog; apply one discovery contract.
+  const upcomingWorkshops = useMemo(() => discoverWorkshops(workshops, now), [workshops, now]);
 
   const filteredWorkshops = useMemo(() => {
     return upcomingWorkshops.filter((w) => {
@@ -73,6 +66,8 @@ export const WorkshopsPage: React.FC = () => {
         />
 
         {/* Loading State */}
+        <button disabled={workshopsRefreshing || workshopsLoading} onClick={() => reloadWorkshops()} className="mb-4 text-xs font-semibold text-[#2F6BFF] disabled:opacity-50">Refresh workshops</button>
+        {workshopsRefreshing && <p role="status" className="text-sm mb-4">Refreshing workshops...</p>}
         {workshopsLoading && (
           <div role="status" className="w-full py-24 flex flex-col items-center justify-center text-center">
             <Loader2 className="w-8 h-8 text-[#2F6BFF] animate-spin mb-3" />
@@ -104,7 +99,7 @@ export const WorkshopsPage: React.FC = () => {
           filteredWorkshops.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredWorkshops.map((workshop) => (
-                <WorkshopCard key={workshop.id} workshop={workshop} />
+                <WorkshopCard key={workshop.id} workshop={workshop} now={now} />
               ))}
             </div>
           ) : (
