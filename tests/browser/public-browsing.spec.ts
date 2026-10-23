@@ -34,19 +34,20 @@ async function browse(page: Page) {
   await expect(page.getByRole('heading', { name: 'Upcoming Workshops', exact: true })).toBeVisible();
 }
 
-test('protected action dialog dismisses with Escape and restores focus', async ({ page }, testInfo) => {
+test('public hosting contact dialog dismisses with Escape and restores focus', async ({ page }, testInfo) => {
   await mockCatalog(page);
   await browse(page);
   const host = page.getByRole('button', { name: 'Host a workshop', exact: true });
   await host.click();
-  const dialog = page.getByRole('dialog');
+  const dialog = page.getByRole('dialog', { name: 'Host a Workshop', exact: true });
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused();
-  await page.screenshot({ path: testInfo.outputPath('auth-dialog.png') });
+  await expect(dialog).toContainText('Contact us to get it listed');
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true }).first()).toBeFocused();
+  await page.screenshot({ path: testInfo.outputPath('host-contact-dialog.png') });
   await page.keyboard.press('Shift+Tab');
-  await expect(dialog.getByRole('button', { name: 'Explore workshops', exact: true })).toBeFocused();
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true }).last()).toBeFocused();
   await page.keyboard.press('Tab');
-  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused();
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true }).first()).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
   await expect(host).toBeFocused();
@@ -176,7 +177,7 @@ test('stale dialogs close on public navigation and logout; private actions stay 
     await expect(page.getByRole('heading', { name: /My Registered Workshops|Registered Workshops|Admin Portal/ })).toHaveCount(0);
   }
   await page.getByRole('button', { name: 'Open host', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: 'Sign-in temporarily unavailable' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Host a Workshop' })).toBeVisible();
   await page.keyboard.press('Escape');
   const before = requests.length;
   await page.getByRole('button', { name: 'Cancel registration', exact: true }).click();

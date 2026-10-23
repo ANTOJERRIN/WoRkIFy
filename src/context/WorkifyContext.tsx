@@ -34,7 +34,7 @@ type ScopedProps = React.PropsWithChildren<{
 function ScopedWorkifyProvider({ children, session, catalog, theme, route }: ScopedProps) {
   const profile = useProfile(session.authUser?.id);
   const registrations = useRegistrations(session.authUser?.id, catalog.reloadWorkshops);
-  const modals = useModals(session.isLoggedIn, route.currentPage, route.selectedWorkshopId);
+  const modals = useModals(route.currentPage, route.selectedWorkshopId);
   const { closeModals, setIsAuthModalOpen } = modals;
   const { navigate } = route;
   const { logout: endSession, isLoggedIn } = session;

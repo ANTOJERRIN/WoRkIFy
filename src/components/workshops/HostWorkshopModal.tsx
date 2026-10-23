@@ -5,11 +5,11 @@ import { X, Sparkles, PhoneCall } from 'lucide-react';
 import { HOST_CONTACT_NUMBER } from '../../config/site';
 
 export const HostWorkshopModal: React.FC = () => {
-  const { isLoggedIn, isHostModalOpen, setIsHostModalOpen } = useWorkify();
+  const { isHostModalOpen, setIsHostModalOpen } = useWorkify();
   const closeDialog = useCallback(() => setIsHostModalOpen(false), [setIsHostModalOpen]);
-  const dialogRef = useModalDialog(isLoggedIn && isHostModalOpen, closeDialog);
+  const dialogRef = useModalDialog(isHostModalOpen, closeDialog);
 
-  if (!isLoggedIn || !isHostModalOpen) return null;
+  if (!isHostModalOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
