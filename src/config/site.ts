@@ -1,1 +1,1 @@
-export { HOST_CONTACT_NUMBER, F1FORGE_URL } from '../../frontend/src/config/site';
+export const F1FORGE_URL = import.meta.env.VITE_F1FORGE_URL || '';

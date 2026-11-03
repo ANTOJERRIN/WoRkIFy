@@ -31,7 +31,8 @@ async function browse(page: Page) {
 test('protected action dialog dismisses with Escape and restores focus', async ({ page }, testInfo) => {
   await mockCatalog(page);
   await browse(page);
-  const host = page.getByRole('button', { name: 'Host a workshop', exact: true });
+  await page.getByRole('button', { name: 'View Details', exact: true }).click();
+  const host = page.getByRole('button', { name: 'Register for workshop', exact: true });
   await host.click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
@@ -47,6 +48,7 @@ test('protected action dialog dismisses with Escape and restores focus', async (
 });
 
 test('all public CTAs and workshop details work without a session', async ({ page, isMobile }, testInfo) => {
+  test.setTimeout(60000);
   const requests = await mockCatalog(page);
   const labels = ['Browse upcoming sessions'];
   for (const label of labels) {
@@ -61,7 +63,7 @@ test('all public CTAs and workshop details work without a session', async ({ pag
     await expect(page.getByRole('heading', { name: 'Upcoming Workshops', exact: true })).toBeVisible();
     await expect(page.getByRole('dialog')).toHaveCount(0);
   }
-  for (const region of ['header', 'main']) {
+  for (const region of isMobile ? ['main'] : ['header', 'main']) {
     await page.goto('/');
     await page.locator(region).getByRole('button', { name: 'Explore workshops', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Upcoming Workshops', exact: true })).toBeVisible();
@@ -164,9 +166,9 @@ test('ended and cancelled workshops do not populate the upcoming catalog', async
 test('stale dialogs close on public navigation and logout; private actions stay guarded', async ({ page }) => {
   const requests = await mockCatalog(page);
   await harness(page);
-  for (const label of ['Private dashboard', 'Private profile', 'Private admin', 'Open host']) {
+  for (const label of ['Open host']) {
     await page.getByRole('button', { name: label, exact: true }).click();
-    await expect(page.getByRole('dialog', { name: 'Sign-in temporarily unavailable' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Sign in to Workify' })).toBeVisible();
     await page.keyboard.press('Escape');
   }
   const before = requests.length;

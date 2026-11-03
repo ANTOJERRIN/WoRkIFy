@@ -1,16 +1,15 @@
 // Test-only context driver; the production entry never imports this module.
 import { createRoot } from 'react-dom/client';
-import { WorkifyProvider, useWorkify } from '../../frontend/src/context/WorkifyContext';
-import { supabase } from '../../frontend/src/lib/supabase';
-import { WorkshopsPage } from '../../frontend/src/components/workshops/WorkshopsPage';
-import { WorkshopDetailPage } from '../../frontend/src/components/workshops/WorkshopDetailPage';
-import { AuthModal } from '../../frontend/src/components/auth/AuthModal';
-import { HostWorkshopModal } from '../../frontend/src/components/workshops/HostWorkshopModal';
-import '../../frontend/src/index.css';
+import { WorkifyProvider, useWorkify } from '../../src/context/WorkifyContext';
+import { supabase } from '../../src/lib/supabase';
+import { WorkshopsPage } from '../../src/components/workshops/WorkshopsPage';
+import { WorkshopDetailPage } from '../../src/components/workshops/WorkshopDetailPage';
+import { AuthModal } from '../../src/components/auth/AuthModal';
+import '../../src/index.css';
 
 const mode = new URLSearchParams(location.search).get('session');
-if (mode === 'reject') supabase.auth.getSession = () => Promise.reject(new Error('Test session failure'));
-if (mode === 'pending') supabase.auth.getSession = () => new Promise(() => {});
+if (mode === 'reject') supabase.auth.getUser = () => Promise.reject(new Error('Test session failure'));
+if (mode === 'pending') supabase.auth.getUser = () => new Promise(() => {});
 
 export function Driver() {
   const state = useWorkify();
@@ -30,7 +29,7 @@ export function Driver() {
     <main tabIndex={-1}>
       {state.currentPage === 'workshop-detail' ? <WorkshopDetailPage /> : <WorkshopsPage />}
     </main>
-    <AuthModal /><HostWorkshopModal />
+    <AuthModal />
   </>;
 }
 

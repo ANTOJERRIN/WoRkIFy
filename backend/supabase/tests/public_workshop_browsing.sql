@@ -1,4 +1,4 @@
-﻿-- Run against a disposable database after applying the migrations, as postgres.
+-- Run against a disposable database after applying the migrations, as postgres.
 -- Fixture data and changes are rolled back. No production credentials are needed.
 begin;
 insert into auth.users (id, email) values
@@ -6,10 +6,10 @@ insert into auth.users (id, email) values
  ('33333333-3333-4333-8333-333333333333', 'other@example.test'),
  ('44444444-4444-4444-8444-444444444444', 'admin@example.test');
 insert into public.admin_users values ('44444444-4444-4444-8444-444444444444');
-insert into public.workshops (id, slug, title, host_name) values
- ('11111111-1111-4111-8111-111111111111','auth-regression','Auth regression','Test host');
+insert into public.workshops (id, slug, title, host_name, starts_at, ends_at) values
+ ('11111111-1111-4111-8111-111111111111','auth-regression','Auth regression','Test host','2099-01-01 14:00:00+00','2099-01-01 15:00:00+00');
 insert into public.workshop_links values
- ('11111111-1111-4111-8111-111111111111','https://meet.google.com/test-fixture');
+ ('11111111-1111-4111-8111-111111111111','https://meet.google.com/abc-defg-hij');
 insert into public.registrations (user_id, workshop_id) values
  ('22222222-2222-4222-8222-222222222222','11111111-1111-4111-8111-111111111111');
 
@@ -20,8 +20,11 @@ declare private_table text; visible_count integer;
 begin
  assert exists (select 1 from public.workshops where slug = 'auth-regression'), 'Visitors must see workshops';
  foreach private_table in array array['profiles','registrations','workshop_links','admin_users','linkedin_reviews'] loop
-  execute format('select count(*) from public.%I', private_table) into visible_count;
-  assert visible_count = 0, 'Anonymous private data exposure: ' || private_table;
+  begin
+    execute format('select count(*) from public.%I', private_table) into visible_count;
+    assert visible_count = 0, 'Anonymous private data exposure: ' || private_table;
+  exception when insufficient_privilege then null;
+  end;
  end loop;
  begin
   insert into public.registrations (user_id, workshop_id) values
@@ -39,10 +42,16 @@ begin
   raise exception 'Anonymous admin escalation was allowed';
  exception when insufficient_privilege then null;
  end;
- update public.profiles set name='forbidden';
- assert not found, 'Anonymous profile update was allowed';
- delete from public.workshops;
- assert not found, 'Anonymous workshop deletion was allowed';
+ begin
+   update public.profiles set name='forbidden';
+   assert not found, 'Anonymous profile update was allowed';
+ exception when insufficient_privilege then null;
+ end;
+ begin
+   delete from public.workshops;
+   assert not found, 'Anonymous workshop deletion was allowed';
+ exception when insufficient_privilege then null;
+ end;
 end $$;
 
 set local role authenticated;

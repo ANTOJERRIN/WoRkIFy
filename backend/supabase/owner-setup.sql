@@ -1,0 +1,9 @@
+-- Run only in the confirmed project's SQL editor, after the owner has signed up
+-- and verified their email. Replace the UUID from Authentication > Users.
+-- Never put this operation or a service-role key in the browser.
+-- The migration enforces a single admin. This does not replace an existing owner.
+-- insert into public.admin_users (user_id)
+-- select id from auth.users
+-- where id = '<CONFIRMED_OWNER_AUTH_UUID>'::uuid and email_confirmed_at is not null
+-- on conflict (user_id) do nothing;
+-- Verify exactly one row was inserted/exists, and that it is the intended owner.
