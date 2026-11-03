@@ -1,126 +1,99 @@
-# Workify
+# Workify login and owner workshop tools
 
-Workify supports workshop discovery, registration history, profiles and
-admin-controlled workshop hosting. The frontend uses React, TypeScript, Vite and
-Tailwind; Supabase provides database, session and storage services.
+Workify uses React, TypeScript, Vite and Supabase. Visitors can browse workshops;
+member accounts can register and manage their own profile. One server-managed
+admin account can create, schedule, edit, cancel and archive workshops, manage
+private Google Meet links and view workshop registrations.
 
-## One application setup
+## Run locally
 
-Run frontend commands from the **repository root**, using Node.js 24 and npm
-(verified with Node 24.14.1 / npm 11.11.0). Vite declares Node 20.19+ or 22.12+
-support; the native TypeScript configuration tests use Node 24.
+Use Node 24 and run commands from the repository root:
 
 ```powershell
 npm.cmd ci
-Copy-Item .env.example .env
-# Fill in .env with your project's public configuration.
+Copy-Item .env.example .env.local
+# Set the confirmed project's API URL and public publishable key.
 npm.cmd run dev
 ```
 
-On other shells, use `npm` and `cp .env.example .env`. `npm ci` installs the exact
-root lockfile. There is no separate frontend install or workspace package.
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are public browser
+configuration. The legacy `VITE_SUPABASE_ANON_KEY` name remains supported. Never
+put a service-role key, secret API key or database password in a `VITE_` variable.
+Missing configuration renders a setup message; production builds reject missing,
+placeholder or privileged credentials.
 
-## Public configuration
+## Application boundaries
 
-| Variable | Purpose |
-| --- | --- |
-| `VITE_SUPABASE_URL` | Your Supabase project API URL |
-| `VITE_SUPABASE_ANON_KEY` | Public publishable key, or legacy anon key |
+- `src/main.tsx`: validates configuration before importing the application.
+- `src/routing/useAppRoute.ts`: URL routes and Back/Forward behavior.
+- `src/context/AuthContext.tsx`: verified identity, session events, logout and
+  independent server-controlled admin permission resolution.
+- `src/context/WorkifyContext.tsx`: public catalog, navigation and account data.
+- `src/components/auth/`: sign-in page/dialog, signup and password reset/recovery.
+- `src/components/admin/`: workshop library, editor, meeting links and attendees.
+- `src/api/`: typed Supabase operations; `src/domain/`: workshop validation and IST
+  conversions; `src/lib/supabase.ts`: session and independent anonymous clients.
+- `backend/supabase/`: migrations and owner setup; these are never browser modules.
 
-The example contains placeholders only. Set real values in the ignored root
-`.env` file or the hosting build environment. Restart Vite after changing them.
-Vite embeds `VITE_` variables in browser output: never use service-role keys,
-`sb_secret_` keys, database passwords or other server secrets there.
+Routes: `/`, `/workshops`, `/workshops/:slug-or-id`, `/login`, `/dashboard`,
+`/profile`, `/admin`. Protected pages wait for verified identity. Admin pages also
+wait for permission and deny access when the lookup fails. Login on a protected
+page keeps that destination. Login at `/login` opens the admin console for the
+owner and the dashboard for members. Unknown routes show a not-found page.
 
-Development shows a readable setup error for missing/invalid configuration.
-Production builds reject missing/placeholder values. Known server secret keys
-are rejected before serving or bundling. Validation checks setup shape, not key
-validity or cloud permissions.
+Deploy static output from root `dist/` with an SPA fallback to `index.html` for
+application routes. No deployment provider has been configured in this change.
 
-## Commands from the root
+## Authentication and the single admin
 
-| Command | Purpose |
-| --- | --- |
-| `npm.cmd ci` | Clean, reproducible dependency installation |
-| `npm.cmd run dev` | Local development |
-| `npm.cmd run build` | Type-check application/tests/configuration; build `dist/` |
-| `npm.cmd run preview` | Serve the existing production build locally |
-| `npm.cmd run lint` | Lint source and tests |
-| `npm.cmd run test:config` | Configuration and build rejection checks |
-| `npm.cmd run test:db` | Disposable PostgreSQL migration/authorization checks |
-| `npm.cmd run test:browser` | Desktop/mobile browser regression checks |
+Email/password login, attendee signup, email confirmation and password recovery
+use Supabase Auth with PKCE. Configure the Supabase Site URL and allowlisted
+redirects for each actual origin's `/login` URL, including localhost in development.
+Keep email confirmation enabled. Email delivery and real callback completion still
+need live verification. Existing accounts that originally used Google can set an
+email password through the reset flow; no Google sign-in button is added.
 
-Install Chromium once with `npx.cmd playwright install chromium`. To use installed
-Edge on Windows, set `$env:PLAYWRIGHT_CHANNEL = 'msedge'` before browser tests.
-Fixtures do not create cloud accounts or workshops.
+The role source is `public.admin_users`, never profile fields, signup data or
+`user_metadata`. Browser clients cannot add/change/remove memberships. The new
+migration enforces at most one admin. After confirming the owner's verified Auth
+UUID, provision it through the trusted SQL editor using
+`backend/supabase/owner-setup.sql`. Existing ownership is never replaced
+implicitly, and first signup never grants admin privileges.
 
-## Locations
+## Database release status
 
-```text
-index.html                  HTML entry, favicon and fonts
-package.json / lockfile     One dependency and command setup
-vite.config.ts              One frontend build configuration
-src/main.tsx                Bootstrap and configuration error presentation
-src/App.tsx                 Page shell and current navigation rendering
-src/components/             Features and shared layout
-src/context/                Existing session/shared state
-src/api/                    Database/storage access
-src/lib/supabase.ts         Session client and public catalog client
-src/config/                 Public runtime configuration and site settings
-src/types/                  Shared contracts
-src/data/                   Existing profile initialization
-src/index.css               Active Tailwind/theme stylesheet
-public/                     Runtime assets, including workify-logo.png
-backend/supabase/            Migrations and SQL tests
-tests/                      Browser, configuration and disposable DB tests
-docs/                       Current implementation/release notes
-resource --prompt section/  Historical plans and staged instructions
-```
+The cloud connection remains pending. No cloud migration, role assignment, Auth
+provider change or deployment was performed. Live schema and email delivery must
+be verified during backend setup.
 
-The browser build rejects imports from backend/test directories. The old
-`frontend/` setup is retired; an ignored historical `frontend/dist/` on an
-existing workstation is not deployment output. See the
-[old-to-new module map](docs/project-layout.md).
+`20261103015917_owner_workshop_access.sql` is locally tested and unapplied. It
+replaces publishing/meeting-link/admin policies, adds public metadata reads,
+validates workshop inputs and preserves history by disallowing workshop deletion.
+Old rows remain under NOT VALID constraints; new/updated rows must comply. Only
+open, unended sessions accept new registrations. Only the owner and registered
+attendees of open scheduled sessions can read private links. The UI opens attendee
+joining 15 minutes before the session; the database protects membership/status,
+not a time-based secrecy guarantee.
 
-## Backend migrations
+Before release, restore the confirmed project, inspect schema/policies/history,
+resolve the known drift, review the migration against the live structure and run
+security advisors. Do not replay the baseline schema/seeds or blindly run `db push`.
+The new migration includes public-read/archival-status policy support; review older
+pending archival work separately so historical data is not modified implicitly.
 
-Keep SQL under `backend/supabase/`; frontend access stays in `src/api/` and
-`src/lib/supabase.ts`. Create a migration from the repository root with:
+See [implementation notes](docs/login-admin.md).
+
+## Validation
 
 ```powershell
-npx.cmd supabase --workdir backend migration new descriptive_name
+npm.cmd run build           # Requires valid-shaped public configuration
+npm.cmd run lint
+npm.cmd run test:config
+npm.cmd run test:db
+$env:PLAYWRIGHT_CHANNEL = 'msedge'
+npm.cmd run test:browser -- --workers=2
 ```
 
-Review SQL and run relevant disposable tests. Applying migrations requires a
-separate release decision, confirmed project identity and verified schema/history.
-The inspected cloud project has schema/history drift; do not blindly replay the
-original schema, seeds or all local migrations. See
-[public browsing](docs/public-browsing.md) and
-[LinkedIn retirement](docs/linkedin-retirement.md) for pending migrations.
-
-## Deployment settings after review
-
-| Setting | Canonical value |
-| --- | --- |
-| Root directory | Repository root (`.`), not `frontend/` |
-| Install | `npm ci` |
-| Build | `npm run build` |
-| Output/publish directory | `dist` |
-| Build environment | Node 24 and both public Supabase variables |
-
-`npm run preview` is for local verification. No hosting provider/deployed commit
-has been confirmed, and no hosting settings have been changed.
-
-## Current feature limits
-
-Public discovery/details are implemented; deployed anonymous access still needs
-the pending public-read migration and correct configuration. Existing valid
-sessions support protected registration/history/profile/admin/contact-hosting
-flows, subject to backend policies. Google sign-in remains removed; replacement
-login is unavailable.
-
-The LinkedIn review feature is retired from source. Its archival migration is
-unapplied in the inspected project; historical data remains. Meeting URLs stay
-private. Full routing and further lifecycle/access work belong to later prompts.
-Registration does not prove attendance, completion, certification or assessment
-success. No cloud migration or deployment is part of these local edits.
+Browser checks intercept Supabase HTTP requests; database checks use disposable
+PGlite PostgreSQL instances. Neither writes test workshops/accounts to Supabase.
+Fixtures are not evidence of cloud configuration or delivered email.

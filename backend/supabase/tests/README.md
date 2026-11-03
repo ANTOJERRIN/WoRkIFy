@@ -1,35 +1,19 @@
-# Public browsing regression checks
+# Database authorization checks
 
-The local archival regression runner applies the source schema, public-read and
-archival migrations to disposable in-memory PostgreSQL, then runs this SQL suite:
+Run `npm run test:db` from the repository root. The runner creates disposable
+PGlite PostgreSQL instances, provides local Auth-role shims, applies the baseline
+schema and the targeted owner-access migration, and exercises actual grants/RLS.
+No cloud credentials, accounts or workshops are created.
 
-```sh
-npm run test:db
-```
+Checks cover anonymous/private access, a single admin, denied self-promotion,
+member publishing denial, owner create/update, invalid schedules/duplicate slugs,
+private meeting links, closed-workshop registration denial, and archival history.
+The standalone `public_workshop_browsing.sql` suite is also run inside PGlite.
 
-It also verifies historical record preservation, archived access restrictions,
-exact-ID targeting, missing-ID behavior and metadata mismatch rejection. No cloud
-credentials are used. See `docs/linkedin-retirement.md` for release limitations.
+That SQL suite may be run as postgres against a fresh disposable Supabase database
+with the owner-access migration applied. It rolls back its fixtures. Never run
+fixtures against production or against a project containing an existing admin.
 
-Run `public_workshop_browsing.sql` as postgres against a disposable Supabase
-database with the migrations applied. For example:
-
-```sh
-psql "$TEST_DATABASE_URL" -v ON_ERROR_STOP=1 -f backend/supabase/tests/public_workshop_browsing.sql
-```
-
-The transaction rolls back its fixtures. It checks public workshop reads,
-anonymous private-data and write denial, registration-gated Meet links,
-profile ownership, and admin permissions.
-
-The public listing requires `20261013172822_public_workshop_browsing.sql`.
-Apply that migration as part of a separately authorized release before exposing
-the new visitor flow. It adds only anonymous SELECT access to workshop metadata;
-Meet URLs remain in the protected `workshop_links` table. This change does not
-disable or otherwise configure the Supabase Google provider.
-
-Browser checks should cover desktop/mobile and both themes, each landing/navbar
-workshop button, registration and hosting unavailability with Close/Explore
-actions, existing session restoration, profile/admin authorization, registered
-Meet access, Calendar, and logout. Live session/provider verification requires
-the target project's environment and an existing authenticated test account.
+PGlite tests PostgreSQL policies; it does not validate Supabase Auth configuration,
+email delivery, PostgREST caching or production schema drift. Those require the
+confirmed project's restoration, live inspection, advisors and targeted checks.

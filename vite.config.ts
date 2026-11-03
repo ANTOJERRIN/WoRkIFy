@@ -6,7 +6,7 @@ import { assertPublicBrowserKey, readPublicConfig } from './src/config/runtime.t
 
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, fileURLToPath(new URL('.', import.meta.url)), 'VITE_')
-  assertPublicBrowserKey(env.VITE_SUPABASE_ANON_KEY)
+  assertPublicBrowserKey(env.VITE_SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_ANON_KEY)
   if (command === 'build') readPublicConfig(env)
 
   return {
